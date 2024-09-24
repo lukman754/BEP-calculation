@@ -1,14 +1,5 @@
 import streamlit as st
 import matplotlib.pyplot as plt
-from streamlit_javascript import st_javascript
-
-def format_rupiah(value):
-    """Format the value to Rupiah currency format."""
-    return f"Rp {value:,.2f}"
-
-def parse_rupiah(value):
-    """Parse the formatted Rupiah string back to a float."""
-    return float(value.replace("Rp ", "").replace(",", "").strip())
 
 def calculate_profit_or_loss(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
     total_revenue = price_per_unit * units_sold  # TR = P . Q
@@ -57,36 +48,14 @@ def plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
 def input_form():
     st.title("Kalkulator Keuntungan atau Kerugian dan Target Keuntungan")
 
-    # Input dari pengguna dengan format Rupiah secara realtime
-    fixed_cost = st.text_input("Masukkan Biaya Tetap (FC) (Rp)", "")
-    price_per_unit = st.text_input("Masukkan Harga Jual per Unit (P) (Rp)", "")
-    variable_cost_per_unit = st.text_input("Masukkan Biaya Variabel per Unit (AVC) (Rp)", "")
+    # Input dari pengguna
+    fixed_cost = st.number_input("Masukkan Biaya Tetap (FC) (Rp)", min_value=0.0, step=100.0)
+    price_per_unit = st.number_input("Masukkan Harga Jual per Unit (P) (Rp)", min_value=0.0, step=100.0)
+    variable_cost_per_unit = st.number_input("Masukkan Biaya Variabel per Unit (AVC) (Rp)", min_value=0.0, step=100.0)
     units_sold = st.number_input("Masukkan Jumlah Unit Terjual (Q)", min_value=0, step=1)
-    target_profit = st.text_input("Masukkan Target Keuntungan (Rp)", "")
-
-    # JavaScript to format input as Rupiah in real-time
-    st_javascript("""
-    const inputs = document.querySelectorAll('input[type="text"]');
-    inputs.forEach(input => {
-        input.addEventListener('input', function() {
-            let value = this.value.replace(/Rp /, "").replace(/,/g, "");
-            if(!isNaN(value) && value !== '') {
-                value = parseFloat(value);
-                this.value = 'Rp ' + value.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            } else {
-                this.value = 'Rp ';
-            }
-        });
-    });
-    """)
+    target_profit = st.number_input("Masukkan Target Keuntungan (Rp)", min_value=0.0, step=100.0)
 
     if st.button('Hitung'):
-        # Parse the formatted Rupiah inputs back to float
-        fixed_cost = parse_rupiah(fixed_cost)
-        price_per_unit = parse_rupiah(price_per_unit)
-        variable_cost_per_unit = parse_rupiah(variable_cost_per_unit)
-        target_profit = parse_rupiah(target_profit)
-
         # Hitung keuntungan/kerugian
         total_revenue, total_cost, profit_or_loss = calculate_profit_or_loss(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold)
 
@@ -97,16 +66,16 @@ def input_form():
         st.subheader("=== Hasil Detail ===")
         st.write(f"**Rumus Total Pendapatan (TR):** TR = P . Q")
         st.write(f"TR = {price_per_unit} x {units_sold}")
-        st.write(f"**Total Pendapatan:** {format_rupiah(total_revenue)}")
+        st.write(f"**Total Pendapatan:** Rp {total_revenue:,.2f}")
 
         st.write(f"**Rumus Total Biaya (TC):** TC = FC + TVC = FC + AVC . Q")
         st.write(f"TC = {fixed_cost} + ({variable_cost_per_unit} x {units_sold})")
-        st.write(f"**Total Biaya:** {format_rupiah(total_cost)}")
+        st.write(f"**Total Biaya:** Rp {total_cost:,.2f}")
 
         if profit_or_loss > 0:
-            st.success(f"**Keuntungan (TR > TC):** {format_rupiah(profit_or_loss)}")
+            st.success(f"**Keuntungan (TR > TC):** Rp {profit_or_loss:,.2f}")
         elif profit_or_loss < 0:
-            st.error(f"**Kerugian (TR < TC):** {format_rupiah(-profit_or_loss)}")
+            st.error(f"**Kerugian (TR < TC):** Rp {-profit_or_loss:,.2f}")
         else:
             st.info("**Break Even Point (TR = TC):** Tidak ada keuntungan atau kerugian.")
 
@@ -116,10 +85,45 @@ def input_form():
         st.write(f"**Rumus BEP (Rp):** BEP(Rp.) = FC / (1 - AVC / P)")
         st.write(f"BEP(Rp.) = {fixed_cost} / (1 - {variable_cost_per_unit}/{price_per_unit})")
 
-        st.write(f"**Untuk mencapai target keuntungan {format_rupiah(target_profit)}, Anda perlu menjual {required_units_for_target:.2f} unit.**")
+        st.write(f"**Untuk mencapai target keuntungan Rp {target_profit:,.2f}, Anda perlu menjual {required_units_for_target:.2f} unit.**")
 
         # Tampilkan grafik keuntungan/kerugian
-        plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold)
+        def plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
+    units = list(range(units_sold + 1))
+    total_revenue = [price_per_unit * unit for unit in units]  # TR
+    total_variable_cost = [variable_cost_per_unit * unit for unit in units]  # TVC
+    total_cost = [fixed_cost + total_variable_cost[i] for i in range(units_sold + 1)]  # TC
+    break_even_units = fixed_cost / (price_per_unit - variable_cost_per_unit)  # BEP (units)
+    break_even_revenue = price_per_unit * break_even_units  # BEP (revenue)
+    
+    # Adjust the plot for the graphic
+    plt.figure(figsize=(12, 8))
+    
+    # Grafik Total Pendapatan (TR)
+    plt.plot(units, total_revenue, label="Total Pendapatan (TR)", color="green", linestyle='-', marker='o')
+    
+    # Grafik Total Biaya (TC)
+    plt.plot(units, total_cost, label="Total Biaya (TC)", color="red", linestyle='-', marker='x')
+    
+    # Break-even point (BEP)
+    plt.axvline(break_even_units, color="black", linestyle="--", label=f"BEP = {break_even_units:.2f} units")
+    plt.axhline(break_even_revenue, color="gray", linestyle="--")
 
+    # Add shading for Daerah Rugi and Daerah Untung
+    plt.fill_between(units, total_cost, total_revenue, where=(total_revenue < total_cost), color='gray', alpha=0.5, label='Daerah Rugi')
+    plt.fill_between(units, total_cost, total_revenue, where=(total_revenue > total_cost), color='green', alpha=0.5, label='Daerah Untung')
+
+    # Title and labels
+    plt.title("Grafik Keuntungan atau Kerugian Berdasarkan Unit Terjual", fontsize=16)
+    plt.xlabel("Jumlah Unit (Q)", fontsize=14)
+    plt.ylabel("Rupiah (Rp.)", fontsize=14)
+    plt.legend(fontsize=12)
+    
+    # Grid and markers
+    plt.grid(True, linestyle='--', linewidth=0.7, alpha=0.6)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    
+    st.pyplot(plt)
 # Jalankan form Streamlit
 input_form()
