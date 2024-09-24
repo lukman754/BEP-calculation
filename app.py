@@ -87,13 +87,22 @@ def input_form():
 
         # Tampilkan hasil detail
         st.subheader("=== Hasil Detail ===")
-        st.write(f"**Rumus Total Pendapatan (TR):** TR = P . Q")
-        st.write(f"TR = {price_per_unit} x {units_sold}")
-        st.write(f"**Total Pendapatan:** Rp {total_revenue:,.2f}")
+        
+        # Section for formulas
+        st.markdown("### **Rumus yang Digunakan:**")
+        st.markdown("- **Total Pendapatan (TR):** TR = P . Q")
+        st.markdown("- **Total Biaya (TC):** TC = FC + TVC = FC + AVC . Q")
+        st.markdown("- **Titik Impas (BEP):** BEP(unit) = FC / (P - AVC)")
+        st.markdown("- **Target Keuntungan:** (FC + Target Keuntungan) / (P - AVC)")
 
-        st.write(f"**Rumus Total Biaya (TC):** TC = FC + TVC = FC + AVC . Q")
+        # Section for calculations
+        st.markdown("### **Proses Perhitungan:**")
+        st.write(f"**Total Pendapatan (TR):**")
+        st.write(f"TR = {price_per_unit} x {units_sold} = **Rp {total_revenue:,.2f}**")
+
+        st.write(f"**Total Biaya (TC):**")
         st.write(f"TC = {fixed_cost} + ({variable_cost_per_unit} x {units_sold})")
-        st.write(f"**Total Biaya:** Rp {total_cost:,.2f}")
+        st.write(f"TC = {fixed_cost} + ({variable_cost_per_unit} x {units_sold}) = **Rp {total_cost:,.2f}**")
 
         if profit_or_loss > 0:
             st.success(f"**Keuntungan (TR > TC):** Rp {profit_or_loss:,.2f}")
@@ -104,12 +113,10 @@ def input_form():
 
         # Display BEP results
         if break_even_units is not None:
-            st.write(f"**Rumus BEP (unit):** BEP(unit) = FC / (P - AVC)")
+            st.markdown("### **Hasil Titik Impas (BEP):**")
             st.write(f"BEP(unit) = {fixed_cost} / ({price_per_unit} - {variable_cost_per_unit})")
             st.write(f"**BEP (unit):** {break_even_units:.2f} unit")
-
-            st.write(f"**Rumus BEP (Rp):** BEP(Rp.) = FC / (1 - AVC / P)")
-            st.write(f"BEP(Rp.) = {fixed_cost} / (1 - {variable_cost_per_unit}/{price_per_unit})")
+            st.write(f"BEP(Rp.) = {break_even_units:.2f} x {price_per_unit}")
             st.write(f"**BEP (Rp):** Rp {break_even_revenue:,.2f}")
 
         st.write(f"**Untuk mencapai target keuntungan Rp {target_profit:,.2f}, Anda perlu menjual {required_units_for_target:.2f} unit.**")
