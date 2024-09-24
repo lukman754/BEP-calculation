@@ -1,5 +1,6 @@
 import streamlit as st
 import matplotlib.pyplot as plt
+from streamlit_javascript import st_javascript
 
 def format_rupiah(value):
     """Format the value to Rupiah currency format."""
@@ -56,12 +57,28 @@ def plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
 def input_form():
     st.title("Kalkulator Keuntungan atau Kerugian dan Target Keuntungan")
 
-    # Input dari pengguna
-    fixed_cost = st.text_input("Masukkan Biaya Tetap (FC) (Rp)", value=format_rupiah(0), key='fixed_cost')
-    price_per_unit = st.text_input("Masukkan Harga Jual per Unit (P) (Rp)", value=format_rupiah(0), key='price_per_unit')
-    variable_cost_per_unit = st.text_input("Masukkan Biaya Variabel per Unit (AVC) (Rp)", value=format_rupiah(0), key='variable_cost_per_unit')
+    # Input dari pengguna dengan format Rupiah secara realtime
+    fixed_cost = st.text_input("Masukkan Biaya Tetap (FC) (Rp)", "")
+    price_per_unit = st.text_input("Masukkan Harga Jual per Unit (P) (Rp)", "")
+    variable_cost_per_unit = st.text_input("Masukkan Biaya Variabel per Unit (AVC) (Rp)", "")
     units_sold = st.number_input("Masukkan Jumlah Unit Terjual (Q)", min_value=0, step=1)
-    target_profit = st.text_input("Masukkan Target Keuntungan (Rp)", value=format_rupiah(0), key='target_profit')
+    target_profit = st.text_input("Masukkan Target Keuntungan (Rp)", "")
+
+    # JavaScript to format input as Rupiah in real-time
+    st_javascript("""
+    const inputs = document.querySelectorAll('input[type="text"]');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            let value = this.value.replace(/Rp /, "").replace(/,/g, "");
+            if(!isNaN(value) && value !== '') {
+                value = parseFloat(value);
+                this.value = 'Rp ' + value.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            } else {
+                this.value = 'Rp ';
+            }
+        });
+    });
+    """)
 
     if st.button('Hitung'):
         # Parse the formatted Rupiah inputs back to float
