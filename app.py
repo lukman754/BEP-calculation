@@ -73,6 +73,27 @@ def plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
     
     st.pyplot(plt)
 
+def add_footer():
+    footer = """
+    <style>
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #f1f1f1;
+            color: black;
+            text-align: center;
+            padding: 10px;
+        }
+    </style>
+    <div class="footer">
+        <p>Created by <b>Lukman Muludin</b> © 2024</p>
+    </div>
+    """
+    st.markdown(footer, unsafe_allow_html=True)
+
+
 def input_form():
     st.title("Break Even Point Calculator", anchor=' Kalkulator')
 
@@ -137,3 +158,7 @@ def input_form():
 
 # Jalankan form Streamlit
 input_form()
+
+
+add_footer()
+
