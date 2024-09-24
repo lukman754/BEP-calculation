@@ -77,14 +77,10 @@ def add_footer():
     footer = """
     <style>
         .footer {
-            position: fixed;
-            left: 0;
-            bottom: 0;
             width: 100%;
-            background-color: #f1f1f1;
-            color: black;
             text-align: center;
             padding: 10px;
+            margin-top: 20px;
         }
     </style>
     <div class="footer">
