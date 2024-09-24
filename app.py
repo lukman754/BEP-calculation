@@ -14,46 +14,36 @@ def calculate_units_for_target_profit(fixed_cost, price_per_unit, variable_cost_
     return required_units
 
 def plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
-    if price_per_unit <= variable_cost_per_unit:
-        st.error("Harga Jual per Unit harus lebih besar dari Biaya Variabel per Unit untuk menghitung BEP.")
-        return
-
     units = list(range(units_sold + 1))
     total_revenue = [price_per_unit * unit for unit in units]  # TR
     total_variable_cost = [variable_cost_per_unit * unit for unit in units]  # TVC
-    total_cost = [fixed_cost + total_variable_cost[i] for i in range(len(units))]  # TC
-    break_even_units = fixed_cost / (price_per_unit - variable_cost_per_unit) if (price_per_unit - variable_cost_per_unit) > 0 else 0  # BEP (units)
+    total_cost = [fixed_cost + total_variable_cost[i] for i in range(units_sold + 1)]  # TC
+    profit_or_loss = [total_revenue[i] - total_cost[i] for i in range(units_sold + 1)]  # TR - TC
 
-    # Adjust the plot for the graphic
     plt.figure(figsize=(12, 8))
-
-    # Grafik Total Pendapatan (TR)
+    
+    # Grafik Total Pendapatan
     plt.plot(units, total_revenue, label="Total Pendapatan (TR)", color="green", linestyle='-', marker='o')
-
-    # Grafik Total Biaya (TC)
+    
+    # Grafik Total Biaya
     plt.plot(units, total_cost, label="Total Biaya (TC)", color="red", linestyle='-', marker='x')
+    
+    # Grafik Keuntungan/Kerugian
+    plt.plot(units, profit_or_loss, label="Keuntungan/Kerugian (TR - TC)", color="blue", linestyle='-', marker='s')
+    
+    plt.axhline(0, color='black', linestyle='--')  # Garis impas (BEP)
 
-    # Break-even point (BEP)
-    if break_even_units > 0:
-        plt.axvline(break_even_units, color="black", linestyle="--", label=f"BEP = {break_even_units:.2f} units")
-
-    # Add shading for Daerah Rugi and Daerah Untung
-    plt.fill_between(units, total_cost, total_revenue, where=(total_revenue < total_cost), color='gray', alpha=0.5, label='Daerah Rugi')
-    plt.fill_between(units, total_cost, total_revenue, where=(total_revenue > total_cost), color='green', alpha=0.5, label='Daerah Untung')
-
-    # Title and labels
     plt.title("Grafik Keuntungan atau Kerugian Berdasarkan Unit Terjual", fontsize=16)
-    plt.xlabel("Jumlah Unit (Q)", fontsize=14)
-    plt.ylabel("Rupiah (Rp.)", fontsize=14)
+    plt.xlabel("Jumlah Unit", fontsize=14)
+    plt.ylabel("Rupiah", fontsize=14)
     plt.legend(fontsize=12)
-
+    
     # Grid and markers
     plt.grid(True, linestyle='--', linewidth=0.7, alpha=0.6)
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
-
+    
     st.pyplot(plt)
-
 
 def input_form():
     st.title("Kalkulator Keuntungan atau Kerugian dan Target Keuntungan")
@@ -97,8 +87,44 @@ def input_form():
 
         st.write(f"**Untuk mencapai target keuntungan Rp {target_profit:,.2f}, Anda perlu menjual {required_units_for_target:.2f} unit.**")
 
-        # Panggil fungsi untuk menampilkan grafik
-        plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold)
+        # Tampilkan grafik keuntungan/kerugian
+    def plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
+    units = list(range(units_sold + 1))
+    total_revenue = [price_per_unit * unit for unit in units]  # TR
+    total_variable_cost = [variable_cost_per_unit * unit for unit in units]  # TVC
+    total_cost = [fixed_cost + total_variable_cost[i] for i in range(units_sold + 1)]  # TC
+    break_even_units = fixed_cost / (price_per_unit - variable_cost_per_unit)  # BEP (units)
+    break_even_revenue = price_per_unit * break_even_units  # BEP (revenue)
+    
+    # Adjust the plot for the graphic
+    plt.figure(figsize=(12, 8))
+    
+    # Grafik Total Pendapatan (TR)
+    plt.plot(units, total_revenue, label="Total Pendapatan (TR)", color="green", linestyle='-', marker='o')
+    
+    # Grafik Total Biaya (TC)
+    plt.plot(units, total_cost, label="Total Biaya (TC)", color="red", linestyle='-', marker='x')
+    
+    # Break-even point (BEP)
+    plt.axvline(break_even_units, color="black", linestyle="--", label=f"BEP = {break_even_units:.2f} units")
+    plt.axhline(break_even_revenue, color="gray", linestyle="--")
+
+    # Add shading for Daerah Rugi and Daerah Untung
+    plt.fill_between(units, total_cost, total_revenue, where=(total_revenue < total_cost), color='gray', alpha=0.5, label='Daerah Rugi')
+    plt.fill_between(units, total_cost, total_revenue, where=(total_revenue > total_cost), color='green', alpha=0.5, label='Daerah Untung')
+
+    # Title and labels
+    plt.title("Grafik Keuntungan atau Kerugian Berdasarkan Unit Terjual", fontsize=16)
+    plt.xlabel("Jumlah Unit (Q)", fontsize=14)
+    plt.ylabel("Rupiah (Rp.)", fontsize=14)
+    plt.legend(fontsize=12)
+    
+    # Grid and markers
+    plt.grid(True, linestyle='--', linewidth=0.7, alpha=0.6)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    
+    st.pyplot(plt)
 
 # Jalankan form Streamlit
 input_form()
