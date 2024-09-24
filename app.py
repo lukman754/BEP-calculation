@@ -13,12 +13,18 @@ def calculate_units_for_target_profit(fixed_cost, price_per_unit, variable_cost_
     required_units = (fixed_cost + target_profit) / (price_per_unit - variable_cost_per_unit)  # BEP(unit)
     return required_units
 
+def calculate_break_even_point(fixed_cost, price_per_unit, variable_cost_per_unit):
+    return fixed_cost / (price_per_unit - variable_cost_per_unit) if price_per_unit > variable_cost_per_unit else None
+
 def plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
     units = list(range(units_sold + 1))
     total_revenue = [price_per_unit * unit for unit in units]  # TR
     total_variable_cost = [variable_cost_per_unit * unit for unit in units]  # TVC
     total_cost = [fixed_cost + total_variable_cost[i] for i in range(units_sold + 1)]  # TC
     profit_or_loss = [total_revenue[i] - total_cost[i] for i in range(units_sold + 1)]  # TR - TC
+
+    # Calculate break-even point
+    break_even_units = calculate_break_even_point(fixed_cost, price_per_unit, variable_cost_per_unit)
 
     plt.figure(figsize=(12, 8))
     
@@ -31,7 +37,16 @@ def plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
     # Grafik Keuntungan/Kerugian
     plt.plot(units, profit_or_loss, label="Keuntungan/Kerugian (TR - TC)", color="blue", linestyle='-', marker='s')
     
-    plt.axhline(0, color='black', linestyle='--')  # Garis impas (BEP)
+    # Garis impas (BEP)
+    plt.axhline(0, color='black', linestyle='--')  
+
+    # Garis untuk jumlah unit yang terjual
+    plt.axvline(units_sold, color='orange', linestyle='--', label='Jumlah Unit Terjual')
+
+    # Garis putus-putus untuk titik impas
+    if break_even_units is not None and break_even_units <= units_sold:
+        plt.axvline(break_even_units, color='purple', linestyle='--', label='Titik Impas (BEP)')
+        plt.axhline(total_revenue[round(break_even_units)], color='purple', linestyle='--')
 
     plt.title("Grafik Keuntungan atau Kerugian Berdasarkan Unit Terjual", fontsize=16)
     plt.xlabel("Jumlah Unit", fontsize=14)
