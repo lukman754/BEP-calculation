@@ -65,7 +65,7 @@ def plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
     st.pyplot(plt)
 
 def input_form():
-    st.title("Break Even Point Calculator")
+    st.title("Kalkulator Keuntungan atau Kerugian dan Target Keuntungan")
 
     # Input dari pengguna
     fixed_cost = st.number_input("Masukkan Biaya Tetap (FC) (Rp)", min_value=0.0, step=100.0)
@@ -98,15 +98,15 @@ def input_form():
         # Section for calculations
         st.markdown("### **Proses Perhitungan:**")
         st.write(f"**Total Pendapatan (TR):**")
-        st.write(f"TR = {price_per_unit} x {units_sold} = **Rp {total_revenue}**")
+        st.write(f"TR = {price_per_unit} x {units_sold} = **Rp {total_revenue:,.2f}**")
 
         st.write(f"**Total Biaya (TC):**")
-        st.write(f"TC = {fixed_cost} + ({variable_cost_per_unit} x {units_sold}) = **Rp {total_cost}**")
+        st.write(f"TC = {fixed_cost} + ({variable_cost_per_unit} x {units_sold}) = **Rp {total_cost:,.2f}**")
 
         if profit_or_loss > 0:
-            st.success(f"**Keuntungan (TR > TC):** Rp {profit_or_loss}")
+            st.success(f"**Keuntungan (TR > TC):** Rp {profit_or_loss:,.2f}")
         elif profit_or_loss < 0:
-            st.error(f"**Kerugian (TR < TC):** Rp {-profit_or_loss}")
+            st.error(f"**Kerugian (TR < TC):** Rp {-profit_or_loss:,.2f}")
         else:
             st.info("**Break Even Point (TR = TC):** Tidak ada keuntungan atau kerugian.")
 
@@ -116,9 +116,9 @@ def input_form():
             st.write(f"BEP(unit) = {fixed_cost} / ({price_per_unit} - {variable_cost_per_unit})")
             st.write(f"**BEP (unit):** {break_even_units:.2f} unit")
             st.write(f"BEP(Rp.) = {break_even_units:.2f} x {price_per_unit}")
-            st.write(f"**BEP (Rp):** Rp {break_even_revenue}")
+            st.write(f"**BEP (Rp):** Rp {break_even_revenue:,.2f}")
 
-        st.write(f"**Untuk mencapai target keuntungan Rp {target_profit}, Anda perlu menjual {required_units_for_target:.2f} unit.**")
+        st.write(f"**Untuk mencapai target keuntungan Rp {target_profit:,.2f}, Anda perlu menjual {required_units_for_target:.2f} unit.**")
 
         # Tampilkan grafik keuntungan/kerugian
         plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold)
