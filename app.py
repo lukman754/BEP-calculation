@@ -1,5 +1,10 @@
 import streamlit as st
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
+
+def format_rupiah(x, _):
+    """Formatter function to display values as Rupiah."""
+    return f'Rp {x:,.0f}'
 
 def calculate_profit_or_loss(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
     total_revenue = price_per_unit * units_sold  # TR = P . Q
@@ -30,8 +35,9 @@ def plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
     # Calculate break-even point
     break_even_units = calculate_break_even_point(fixed_cost, price_per_unit, variable_cost_per_unit)
 
+    plt.style.use('dark_background')  # Set dark theme
     plt.figure(figsize=(12, 8))
-    
+
     # Grafik Total Pendapatan
     plt.plot(units, total_revenue, label="Total Pendapatan (TR)", color="green", linestyle='-', marker='o')
     
@@ -42,7 +48,7 @@ def plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
     plt.plot(units, profit_or_loss, label="Keuntungan/Kerugian (TR - TC)", color="blue", linestyle='-', marker='s')
     
     # Garis impas (BEP)
-    plt.axhline(0, color='black', linestyle='--')  
+    plt.axhline(0, color='white', linestyle='--')  
 
     # Garis untuk jumlah unit yang terjual
     plt.axvline(units_sold, color='orange', linestyle='--', label='Jumlah Unit Terjual')
@@ -52,20 +58,23 @@ def plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
         plt.axvline(break_even_units, color='purple', linestyle='--', label='Titik Impas (BEP)')
         plt.axhline(total_revenue[round(break_even_units)], color='purple', linestyle='--')
 
-    plt.title("Grafik Keuntungan atau Kerugian Berdasarkan Unit Terjual", fontsize=16)
-    plt.xlabel("Jumlah Unit", fontsize=14)
-    plt.ylabel("Rupiah", fontsize=14)
-    plt.legend(fontsize=12)
+    plt.title("Grafik Keuntungan atau Kerugian Berdasarkan Unit Terjual", fontsize=16, color='white')
+    plt.xlabel("Jumlah Unit", fontsize=14, color='white')
+    plt.ylabel("Rupiah", fontsize=14, color='white')
+    plt.legend(fontsize=12, loc='upper left', facecolor='black')
     
     # Grid and markers
     plt.grid(True, linestyle='--', linewidth=0.7, alpha=0.6)
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=12)
+    plt.xticks(fontsize=12, color='white')
+    plt.yticks(fontsize=12, color='white')
+
+    # Format y-axis as Rupiah
+    plt.gca().yaxis.set_major_formatter(FuncFormatter(format_rupiah))
     
     st.pyplot(plt)
 
 def input_form():
-    st.title("Kalkulator Keuntungan atau Kerugian dan Target Keuntungan")
+    st.title("Kalkulator Keuntungan atau Kerugian dan Target Keuntungan", anchor=' Kalkulator')
 
     # Input dari pengguna
     fixed_cost = st.number_input("Masukkan Biaya Tetap (FC) (Rp)", min_value=0.0, step=100.0)
@@ -86,23 +95,18 @@ def input_form():
         break_even_revenue = calculate_break_even_revenue(fixed_cost, price_per_unit, variable_cost_per_unit)
 
         # Tampilkan hasil detail
-        st.subheader("Hasil 🔢")
+        st.subheader("=== Hasil Detail ===")
         
-        # Section for formulas
-        st.markdown("### **Rumus yang Digunakan:**")
-        st.markdown("- **Total Pendapatan (TR):** TR = P . Q")
-        st.markdown("- **Total Biaya (TC):** TC = FC + TVC = FC + AVC . Q")
-        st.markdown("- **Titik Impas (BEP):** BEP(unit) = FC / (P - AVC)")
-        st.markdown("- **Target Keuntungan:** (FC + Target Keuntungan) / (P - AVC)")
+        # Display formulas separately
+        st.write("**Rumus Total Pendapatan (TR):**")
+        st.write(f"TR = P . Q")
+        st.write(f"TR = {price_per_unit} x {units_sold} = Rp {total_revenue:,.2f}")
+        
+        st.write("**Rumus Total Biaya (TC):**")
+        st.write(f"TC = FC + TVC = FC + AVC . Q")
+        st.write(f"TC = {fixed_cost} + ({variable_cost_per_unit} x {units_sold}) = Rp {total_cost:,.2f}")
 
-        # Section for calculations
-        st.markdown("### **Proses Perhitungan:**")
-        st.write(f"**Total Pendapatan (TR):**")
-        st.write(f"TR = {price_per_unit} x {units_sold} = **Rp {total_revenue:,.2f}**")
-
-        st.write(f"**Total Biaya (TC):**")
-        st.write(f"TC = {fixed_cost} + ({variable_cost_per_unit} x {units_sold}) = **Rp {total_cost:,.2f}**")
-
+        # Result message for profit/loss
         if profit_or_loss > 0:
             st.success(f"**Keuntungan (TR > TC):** Rp {profit_or_loss:,.2f}")
         elif profit_or_loss < 0:
@@ -112,11 +116,13 @@ def input_form():
 
         # Display BEP results
         if break_even_units is not None:
-            st.markdown("### **Hasil Titik Impas (BEP):**")
-            st.write(f"BEP(unit) = {fixed_cost} / ({price_per_unit} - {variable_cost_per_unit})")
-            st.write(f"**BEP (unit):** {break_even_units:.2f} unit")
-            st.write(f"BEP(Rp.) = {break_even_units:.2f} x {price_per_unit}")
-            st.write(f"**BEP (Rp):** Rp {break_even_revenue:,.2f}")
+            st.write("**Rumus BEP (unit):**")
+            st.write(f"BEP(unit) = FC / (P - AVC)")
+            st.write(f"BEP(unit) = {fixed_cost} / ({price_per_unit} - {variable_cost_per_unit}) = {break_even_units:.2f} unit")
+
+            st.write("**Rumus BEP (Rp):**")
+            st.write(f"BEP(Rp.) = FC / (1 - AVC / P)")
+            st.write(f"BEP(Rp.) = {fixed_cost} / (1 - {variable_cost_per_unit}/{price_per_unit}) = Rp {break_even_revenue:,.2f}")
 
         st.write(f"**Untuk mencapai target keuntungan Rp {target_profit:,.2f}, Anda perlu menjual {required_units_for_target:.2f} unit.**")
 
