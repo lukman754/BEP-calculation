@@ -74,7 +74,7 @@ def plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
     st.pyplot(plt)
 
 def input_form():
-    st.title("Kalkulator Keuntungan atau Kerugian dan Target Keuntungan", anchor=' Kalkulator')
+    st.title("Break Even Point Calculator", anchor=' Kalkulator')
 
     # Input dari pengguna
     fixed_cost = st.number_input("Masukkan Biaya Tetap (FC) (Rp)", min_value=0.0, step=100.0)
@@ -95,14 +95,14 @@ def input_form():
         break_even_revenue = calculate_break_even_revenue(fixed_cost, price_per_unit, variable_cost_per_unit)
 
         # Tampilkan hasil detail
-        st.subheader("=== Hasil Detail ===")
+        st.subheader("Hasil Perhitungan 🔢")
         
         # Display formulas separately
-        st.write("**Rumus Total Pendapatan (TR):**")
+        st.write("**Rumus Total Pendapatan (TR = Total Revenue):**")
         st.write(f"TR = P . Q")
         st.write(f"TR = {price_per_unit} x {units_sold} = Rp {total_revenue:,.2f}")
         
-        st.write("**Rumus Total Biaya (TC):**")
+        st.write("**Rumus Total Biaya (TC = Total Cost):**")
         st.write(f"TC = FC + TVC = FC + AVC . Q")
         st.write(f"TC = {fixed_cost} + ({variable_cost_per_unit} x {units_sold}) = Rp {total_cost:,.2f}")
 
