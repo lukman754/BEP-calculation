@@ -130,7 +130,7 @@ def input_form():
         st.write(f"Jumlah Unit = ({fixed_cost} + {target_profit}) / ({price_per_unit} - {variable_cost_per_unit}) = {required_units_for_target:.2f} unit")
 
         # Display the required units for target profit
-        st.write(f"**Untuk mencapai target keuntungan Rp {target_profit:,.2f}, Anda perlu menjual {required_units_for_target:.2f} unit.**")
+        st.success(f"**Untuk mencapai target keuntungan Rp {target_profit:,.2f}, Anda perlu menjual {required_units_for_target:.2f} unit.**")
 
         # Tampilkan grafik keuntungan/kerugian
         plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold)
