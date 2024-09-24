@@ -1,3 +1,78 @@
+import streamlit as st
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
+
+def format_rupiah(x, _):
+    """Formatter function to display values as Rupiah."""
+    return f'Rp {x:,.0f}'
+
+def calculate_profit_or_loss(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
+    total_revenue = price_per_unit * units_sold  # TR = P . Q
+    total_variable_cost = variable_cost_per_unit * units_sold  # TVC = AVC . Q
+    total_cost = fixed_cost + total_variable_cost  # TC = FC + TVC
+    profit_or_loss = total_revenue - total_cost  # TR - TC
+
+    return total_revenue, total_cost, profit_or_loss
+
+def calculate_units_for_target_profit(fixed_cost, price_per_unit, variable_cost_per_unit, target_profit):
+    required_units = (fixed_cost + target_profit) / (price_per_unit - variable_cost_per_unit)  # BEP(unit)
+    return required_units
+
+def calculate_break_even_point(fixed_cost, price_per_unit, variable_cost_per_unit):
+    return fixed_cost / (price_per_unit - variable_cost_per_unit) if price_per_unit > variable_cost_per_unit else None
+
+def calculate_break_even_revenue(fixed_cost, price_per_unit, variable_cost_per_unit):
+    break_even_units = calculate_break_even_point(fixed_cost, price_per_unit, variable_cost_per_unit)
+    return break_even_units * price_per_unit if break_even_units is not None else None
+
+def plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
+    units = list(range(units_sold + 1))
+    total_revenue = [price_per_unit * unit for unit in units]  # TR
+    total_variable_cost = [variable_cost_per_unit * unit for unit in units]  # TVC
+    total_cost = [fixed_cost + total_variable_cost[i] for i in range(units_sold + 1)]  # TC
+    profit_or_loss = [total_revenue[i] - total_cost[i] for i in range(units_sold + 1)]  # TR - TC
+
+    # Calculate break-even point
+    break_even_units = calculate_break_even_point(fixed_cost, price_per_unit, variable_cost_per_unit)
+
+    plt.style.use('dark_background')  # Set dark theme
+    plt.figure(figsize=(12, 8))
+
+    # Grafik Total Pendapatan
+    plt.plot(units, total_revenue, label="Total Pendapatan (TR)", color="green", linestyle='-', marker='o')
+    
+    # Grafik Total Biaya
+    plt.plot(units, total_cost, label="Total Biaya (TC)", color="red", linestyle='-', marker='x')
+    
+    # Grafik Keuntungan/Kerugian
+    plt.plot(units, profit_or_loss, label="Keuntungan/Kerugian (TR - TC)", color="blue", linestyle='-', marker='s')
+    
+    # Garis impas (BEP)
+    plt.axhline(0, color='white', linestyle='--')  
+
+    # Garis untuk jumlah unit yang terjual
+    plt.axvline(units_sold, color='orange', linestyle='--', label='Jumlah Unit Terjual')
+
+    # Garis putus-putus untuk titik impas
+    if break_even_units is not None and break_even_units <= units_sold:
+        plt.axvline(break_even_units, color='purple', linestyle='--', label='Titik Impas (BEP)')
+        plt.axhline(total_revenue[round(break_even_units)], color='purple', linestyle='--')
+
+    plt.title("Grafik Keuntungan atau Kerugian Berdasarkan Unit Terjual", fontsize=16, color='white')
+    plt.xlabel("Jumlah Unit", fontsize=14, color='white')
+    plt.ylabel("Rupiah", fontsize=14, color='white')
+    plt.legend(fontsize=12, loc='upper left', facecolor='black')
+    
+    # Grid and markers
+    plt.grid(True, linestyle='--', linewidth=0.7, alpha=0.6)
+    plt.xticks(fontsize=12, color='white')
+    plt.yticks(fontsize=12, color='white')
+
+    # Format y-axis as Rupiah
+    plt.gca().yaxis.set_major_formatter(FuncFormatter(format_rupiah))
+    
+    st.pyplot(plt)
+
 def input_form():
     st.title("Kalkulator Keuntungan atau Kerugian dan Target Keuntungan", anchor=' Kalkulator')
 
