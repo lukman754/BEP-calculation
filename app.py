@@ -63,33 +63,7 @@ def input_form():
         required_units_for_target = calculate_units_for_target_profit(fixed_cost, price_per_unit, variable_cost_per_unit, target_profit)
 
         # Tampilkan hasil detail
-        st.subheader("Hasil 🔢")
-        # Total Revenue
-        st.write("📈 **Total Revenue (TR)**")
-        st.write("TR = P × Q")
-        st.write("Where:")
-        st.write("🔹 **P** = Harga per unit")
-        st.write("🔹 **Q** = Kuantitas")
-
-        # Total Cost
-        st.write("💰 **Total Cost (TC)**")
-        st.write("TC = FC + TVC")
-        st.write("Where:")
-        st.write("🔹 **FC** = Fixed Cost")
-        st.write("🔹 **TVC** = Total Variable Cost")
-        st.write("🔹 **AVC** = Average Variable Cost")
-        st.write("TVC = AVC × Q")
-
-        # Break-Even Point
-        st.write("📊 **Break-Even Point (BEP)**")
-        st.write("BEP (unit) = FC / (P - AVC)")
-        st.write("BEP (Rp) = FC / (1 - AVC/P)")
-        
-        # Profit and Loss
-        st.write("🔄 **Analisis Keuntungan dan Kerugian**")
-        st.write("🔹 TR = TC → Pulang Pokok (BEP)")
-        st.write("🔹 TR > TC → Keuntungan = TR – TC")
-        st.write("🔹 TR < TC → Kerugian = TC – TR")
+        st.subheader("=== Hasil Detail ===")
         st.write(f"**Rumus Total Pendapatan (TR):** TR = P . Q")
         st.write(f"TR = {price_per_unit} x {units_sold}")
         st.write(f"**Total Pendapatan:** Rp {total_revenue:,.2f}")
