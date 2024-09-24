@@ -20,16 +20,29 @@ def plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
     total_cost = [fixed_cost + total_variable_cost[i] for i in range(units_sold + 1)]  # TC
     profit_or_loss = [total_revenue[i] - total_cost[i] for i in range(units_sold + 1)]  # TR - TC
 
-    plt.figure(figsize=(10, 6))
-    plt.plot(units, total_revenue, label="Total Pendapatan (TR)", color="green")
-    plt.plot(units, total_cost, label="Total Biaya (TC)", color="red")
-    plt.plot(units, profit_or_loss, label="Keuntungan/Kerugian (TR - TC)", color="blue")
+    plt.figure(figsize=(12, 8))
+    
+    # Grafik Total Pendapatan
+    plt.plot(units, total_revenue, label="Total Pendapatan (TR)", color="green", linestyle='-', marker='o')
+    
+    # Grafik Total Biaya
+    plt.plot(units, total_cost, label="Total Biaya (TC)", color="red", linestyle='-', marker='x')
+    
+    # Grafik Keuntungan/Kerugian
+    plt.plot(units, profit_or_loss, label="Keuntungan/Kerugian (TR - TC)", color="blue", linestyle='-', marker='s')
+    
     plt.axhline(0, color='black', linestyle='--')  # Garis impas (BEP)
-    plt.title("Grafik Keuntungan atau Kerugian Berdasarkan Unit Terjual")
-    plt.xlabel("Jumlah Unit")
-    plt.ylabel("Rupiah")
-    plt.legend()
-    plt.grid(True)
+
+    plt.title("Grafik Keuntungan atau Kerugian Berdasarkan Unit Terjual", fontsize=16)
+    plt.xlabel("Jumlah Unit", fontsize=14)
+    plt.ylabel("Rupiah", fontsize=14)
+    plt.legend(fontsize=12)
+    
+    # Grid and markers
+    plt.grid(True, linestyle='--', linewidth=0.7, alpha=0.6)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    
     st.pyplot(plt)
 
 def input_form():
@@ -52,20 +65,27 @@ def input_form():
         # Tampilkan hasil detail
         st.subheader("=== Hasil Detail ===")
         st.write(f"**Rumus Total Pendapatan (TR):** TR = P . Q")
-        st.write(f"**Total Pendapatan:** Rp {total_revenue:,.2f} (Harga per Unit x Jumlah Unit Terjual)")
+        st.write(f"TR = {price_per_unit} x {units_sold}")
+        st.write(f"**Total Pendapatan:** Rp {total_revenue:,.2f}")
+
         st.write(f"**Rumus Total Biaya (TC):** TC = FC + TVC = FC + AVC . Q")
-        st.write(f"**Total Biaya:** Rp {total_cost:,.2f} (Biaya Tetap + (Biaya Variabel per Unit x Jumlah Unit Terjual))")
+        st.write(f"TC = {fixed_cost} + ({variable_cost_per_unit} x {units_sold})")
+        st.write(f"**Total Biaya:** Rp {total_cost:,.2f}")
 
         if profit_or_loss > 0:
-            st.success(f"**Keuntungan:** Rp {profit_or_loss:,.2f} (TR > TC)")
+            st.success(f"**Keuntungan (TR > TC):** Rp {profit_or_loss:,.2f}")
         elif profit_or_loss < 0:
-            st.error(f"**Kerugian:** Rp {-profit_or_loss:,.2f} (TR < TC)")
+            st.error(f"**Kerugian (TR < TC):** Rp {-profit_or_loss:,.2f}")
         else:
-            st.info("**Break Even Point:** TR = TC, tidak ada keuntungan atau kerugian.")
+            st.info("**Break Even Point (TR = TC):** Tidak ada keuntungan atau kerugian.")
 
         st.write(f"**Rumus BEP (unit):** BEP(unit) = FC / (P - AVC)")
-        st.write(f"**Rumus BEP (Rp):** BEP(Rp.) = FC / (1 - AVC/P)")
-        st.write(f"**Untuk mencapai target keuntungan Rp {target_profit:,.2f}, Anda perlu menjual {required_units_for_target:.2f} unit.")
+        st.write(f"BEP(unit) = {fixed_cost} / ({price_per_unit} - {variable_cost_per_unit})")
+        
+        st.write(f"**Rumus BEP (Rp):** BEP(Rp.) = FC / (1 - AVC / P)")
+        st.write(f"BEP(Rp.) = {fixed_cost} / (1 - {variable_cost_per_unit}/{price_per_unit})")
+
+        st.write(f"**Untuk mencapai target keuntungan Rp {target_profit:,.2f}, Anda perlu menjual {required_units_for_target:.2f} unit.**")
 
         # Tampilkan grafik keuntungan/kerugian
         plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold)
