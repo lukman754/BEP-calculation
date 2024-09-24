@@ -88,7 +88,7 @@ def input_form():
         st.write(f"**Untuk mencapai target keuntungan Rp {target_profit:,.2f}, Anda perlu menjual {required_units_for_target:.2f} unit.**")
 
         # Tampilkan grafik keuntungan/kerugian
-def plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
+    plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
     units = list(range(units_sold + 1))
     total_revenue = [price_per_unit * unit for unit in units]  # TR
     total_variable_cost = [variable_cost_per_unit * unit for unit in units]  # TVC
