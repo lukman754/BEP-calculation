@@ -16,6 +16,10 @@ def calculate_units_for_target_profit(fixed_cost, price_per_unit, variable_cost_
 def calculate_break_even_point(fixed_cost, price_per_unit, variable_cost_per_unit):
     return fixed_cost / (price_per_unit - variable_cost_per_unit) if price_per_unit > variable_cost_per_unit else None
 
+def calculate_break_even_revenue(fixed_cost, price_per_unit, variable_cost_per_unit):
+    break_even_units = calculate_break_even_point(fixed_cost, price_per_unit, variable_cost_per_unit)
+    return break_even_units * price_per_unit if break_even_units is not None else None
+
 def plot_profit(fixed_cost, price_per_unit, variable_cost_per_unit, units_sold):
     units = list(range(units_sold + 1))
     total_revenue = [price_per_unit * unit for unit in units]  # TR
@@ -77,6 +81,10 @@ def input_form():
         # Hitung jumlah unit yang diperlukan untuk mencapai target keuntungan
         required_units_for_target = calculate_units_for_target_profit(fixed_cost, price_per_unit, variable_cost_per_unit, target_profit)
 
+        # Hitung titik impas
+        break_even_units = calculate_break_even_point(fixed_cost, price_per_unit, variable_cost_per_unit)
+        break_even_revenue = calculate_break_even_revenue(fixed_cost, price_per_unit, variable_cost_per_unit)
+
         # Tampilkan hasil detail
         st.subheader("=== Hasil Detail ===")
         st.write(f"**Rumus Total Pendapatan (TR):** TR = P . Q")
@@ -94,11 +102,15 @@ def input_form():
         else:
             st.info("**Break Even Point (TR = TC):** Tidak ada keuntungan atau kerugian.")
 
-        st.write(f"**Rumus BEP (unit):** BEP(unit) = FC / (P - AVC)")
-        st.write(f"BEP(unit) = {fixed_cost} / ({price_per_unit} - {variable_cost_per_unit})")
-        
-        st.write(f"**Rumus BEP (Rp):** BEP(Rp.) = FC / (1 - AVC / P)")
-        st.write(f"BEP(Rp.) = {fixed_cost} / (1 - {variable_cost_per_unit}/{price_per_unit})")
+        # Display BEP results
+        if break_even_units is not None:
+            st.write(f"**Rumus BEP (unit):** BEP(unit) = FC / (P - AVC)")
+            st.write(f"BEP(unit) = {fixed_cost} / ({price_per_unit} - {variable_cost_per_unit})")
+            st.write(f"**BEP (unit):** {break_even_units:.2f} unit")
+
+            st.write(f"**Rumus BEP (Rp):** BEP(Rp.) = FC / (1 - AVC / P)")
+            st.write(f"BEP(Rp.) = {fixed_cost} / (1 - {variable_cost_per_unit}/{price_per_unit})")
+            st.write(f"**BEP (Rp):** Rp {break_even_revenue:,.2f}")
 
         st.write(f"**Untuk mencapai target keuntungan Rp {target_profit:,.2f}, Anda perlu menjual {required_units_for_target:.2f} unit.**")
 
