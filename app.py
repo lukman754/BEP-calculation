@@ -84,7 +84,7 @@ def add_footer():
         }
     </style>
     <div class="footer">
-        <p>Created by <b>Lukman Muludin</b> © 2024</p>
+        <p><b>Chopin</b> © 2024</p>
     </div>
     """
     st.markdown(footer, unsafe_allow_html=True)
