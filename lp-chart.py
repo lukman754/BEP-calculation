@@ -42,18 +42,28 @@ def calculate_lp(z, constraints):
         st.subheader(f"Batasan {i+1}")
         st.write(f"Batasan: {constraint[0]}x + {constraint[1]}y <= {constraint[2]}")
         
+        # Menggunakan persamaan untuk eliminasi atau substitusi
+        equation = Eq(constraint[0]*x + constraint[1]*y, constraint[2])
+        st.write(f"Persamaan batasan: {constraint[0]}x + {constraint[1]}y = {constraint[2]}")
+        
         # Solusi perpotongan dengan sumbu x (y=0)
-        x_intercept = constraint[2] / constraint[0] if constraint[0] != 0 else None
-        if x_intercept is not None:
-            st.write(f"  Perpotongan dengan sumbu x: x = {x_intercept:.2f}")
+        x_intercept = solve(equation.subs(y, 0), x)
+        if x_intercept:
+            st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu x (y = 0):")
+            st.latex(f"{constraint[0]}x = {constraint[2]}")
+            st.latex(f"x = {x_intercept[0]:.2f}")
+            st.write(f"  Perpotongan dengan sumbu x: x = {x_intercept[0]:.2f}")
         
         # Solusi perpotongan dengan sumbu y (x=0)
-        y_intercept = constraint[2] / constraint[1] if constraint[1] != 0 else None
-        if y_intercept is not None:
-            st.write(f"  Perpotongan dengan sumbu y: y = {y_intercept:.2f}")
+        y_intercept = solve(equation.subs(x, 0), y)
+        if y_intercept:
+            st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu y (x = 0):")
+            st.latex(f"{constraint[1]}y = {constraint[2]}")
+            st.latex(f"y = {y_intercept[0]:.2f}")
+            st.write(f"  Perpotongan dengan sumbu y: y = {y_intercept[0]:.2f}")
         
         # Menyimpan batasan untuk plot grafik
-        solutions.append((x_intercept, y_intercept))
+        solutions.append((x_intercept[0], y_intercept[0]))
     
     return solutions
 
