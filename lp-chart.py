@@ -1,20 +1,29 @@
+import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 from sympy import symbols, Eq, solve
 
-# Fungsi untuk mengambil input fungsi tujuan dan batasan secara dinamis
+# Fungsi untuk menampilkan input dinamis dengan streamlit
 def get_input():
-    print("Masukkan koefisien fungsi tujuan (cth: untuk 3x + 2y, masukkan 3 2): ")
-    z = list(map(float, input().split()))
+    st.title("Kalkulator Linear Programming (Metode Grafik)")
+    
+    st.header("Input Fungsi Tujuan")
+    z = [
+        st.number_input("Koefisien x pada fungsi tujuan", value=1.0),
+        st.number_input("Koefisien y pada fungsi tujuan", value=1.0)
+    ]
+    
+    num_constraints = st.number_input("Jumlah Batasan", min_value=1, max_value=5, step=1, value=2)
+    st.header("Input Batasan")
     
     constraints = []
-    num_constraints = int(input("Masukkan jumlah batasan: "))
-    
     for i in range(num_constraints):
-        print(f"Masukkan koefisien batasan ke-{i+1} (cth: untuk 2x + y <= 4, masukkan 2 1 4): ")
-        constraint = list(map(float, input().split()))
-        constraints.append(constraint)
-        
+        st.subheader(f"Batasan {i+1}")
+        a = st.number_input(f"Koefisien x pada batasan {i+1}", value=1.0)
+        b = st.number_input(f"Koefisien y pada batasan {i+1}", value=1.0)
+        c = st.number_input(f"Nilai batasan (<=)", value=1.0)
+        constraints.append([a, b, c])
+    
     return z, constraints
 
 # Fungsi untuk menghitung dan menampilkan proses langkah demi langkah
@@ -22,24 +31,26 @@ def calculate_lp(z, constraints):
     x, y = symbols('x y')
     
     # Tampilkan fungsi tujuan
-    print(f"\nFungsi tujuan: {z[0]}x + {z[1]}y")
+    st.subheader("Fungsi Tujuan")
+    st.write(f"Fungsi tujuan: {z[0]}x + {z[1]}y")
     
     # Menyimpan solusi batasan
     solutions = []
     
     # Proses setiap batasan
     for i, constraint in enumerate(constraints):
-        print(f"\nBatasan {i+1}: {constraint[0]}x + {constraint[1]}y <= {constraint[2]}")
+        st.subheader(f"Batasan {i+1}")
+        st.write(f"Batasan: {constraint[0]}x + {constraint[1]}y <= {constraint[2]}")
         
         # Solusi perpotongan dengan sumbu x (y=0)
         x_intercept = constraint[2] / constraint[0] if constraint[0] != 0 else None
         if x_intercept is not None:
-            print(f"  Perpotongan dengan sumbu x: x = {x_intercept:.2f}")
+            st.write(f"  Perpotongan dengan sumbu x: x = {x_intercept:.2f}")
         
         # Solusi perpotongan dengan sumbu y (x=0)
         y_intercept = constraint[2] / constraint[1] if constraint[1] != 0 else None
         if y_intercept is not None:
-            print(f"  Perpotongan dengan sumbu y: y = {y_intercept:.2f}")
+            st.write(f"  Perpotongan dengan sumbu y: y = {y_intercept:.2f}")
         
         # Menyimpan batasan untuk plot grafik
         solutions.append((x_intercept, y_intercept))
@@ -69,13 +80,16 @@ def plot_lp(solutions, constraints):
     plt.title("Grafik Linear Programming")
     plt.xlabel("x")
     plt.ylabel("y")
-    plt.show()
+    
+    st.pyplot(plt)
 
-# Main function
+# Main function for Streamlit app
 def main():
     z, constraints = get_input()
-    solutions = calculate_lp(z, constraints)
-    plot_lp(solutions, constraints)
+    
+    if st.button("Hitung dan Tampilkan Grafik"):
+        solutions = calculate_lp(z, constraints)
+        plot_lp(solutions, constraints)
 
 if __name__ == "__main__":
     main()
