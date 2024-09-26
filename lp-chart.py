@@ -11,8 +11,8 @@ def get_input():
     st.header("Input Fungsi Tujuan")
     
     cols = st.columns(2)  # Buat dua kolom untuk input x dan y
-    z_x = cols[0].number_input("Koefisien x", value=1.0, key="z_x")
-    z_y = cols[1].number_input("Koefisien y", value=1.0, key="z_y")
+    z_x = cols[0].number_input("Koefisien x", value=1.0, key="z_x", format="%g")
+    z_y = cols[1].number_input("Koefisien y", value=1.0, key="z_y", format="%g")
     
     z = [z_x, z_y]
 
@@ -34,11 +34,11 @@ def get_input():
     # Mengambil input batasan untuk setiap baris
     for i in range(num_constraints):
         with constraint_cols[0]:
-            a = st.number_input(f"x{i+1}", value=1.0, key=f"a_{i}")
+            a = st.number_input(f"x{i+1}", value=1.0, key=f"a_{i}", format="%g")
         with constraint_cols[1]:
-            b = st.number_input(f"y{i+1}", value=1.0, key=f"b_{i}")
+            b = st.number_input(f"y{i+1}", value=1.0, key=f"b_{i}", format="%g")
         with constraint_cols[2]:
-            c = st.number_input(f"Batasan {i+1}", value=1.0, key=f"c_{i}")
+            c = st.number_input(f"Batasan {i+1}", value=1.0, key=f"c_{i}", format="%g")
         
         constraints.append([a, b, c])
     
@@ -67,22 +67,28 @@ def calculate_lp(z, constraints):
         st.write(f"Persamaan batasan: {constraint[0]}x + {constraint[1]}y = {constraint[2]}")
         
         # Solusi perpotongan dengan sumbu x (y=0)
-        x_intercept = solve(equation.subs(y, 0), x)
-        if x_intercept:
-            st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu x (y = 0):")
-            st.latex(f"{constraint[0]}x = {constraint[2]}")
-            st.latex(f"x = {x_intercept[0]:.2f}")
-            st.write(f"  Perpotongan dengan sumbu x: x = {x_intercept[0]:.2f}")
-            max_x = max(max_x, x_intercept[0])
+        if constraint[1] != 0:  # Pastikan tidak ada pembagian dengan 0
+            x_intercept = solve(equation.subs(y, 0), x)
+            if x_intercept:
+                st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu x (y = 0):")
+                st.latex(f"{constraint[0]}x = {constraint[2]}")
+                st.latex(f"x = {x_intercept[0]:.2f}")
+                st.write(f"  Perpotongan dengan sumbu x: x = {x_intercept[0]:.2f}")
+                max_x = max(max_x, x_intercept[0])
+        else:
+            x_intercept = [0]  # Default jika tidak ada solusi valid
         
         # Solusi perpotongan dengan sumbu y (x=0)
-        y_intercept = solve(equation.subs(x, 0), y)
-        if y_intercept:
-            st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu y (x = 0):")
-            st.latex(f"{constraint[1]}y = {constraint[2]}")
-            st.latex(f"y = {y_intercept[0]:.2f}")
-            st.write(f"  Perpotongan dengan sumbu y: y = {y_intercept[0]:.2f}")
-            max_y = max(max_y, y_intercept[0])
+        if constraint[0] != 0:  # Pastikan tidak ada pembagian dengan 0
+            y_intercept = solve(equation.subs(x, 0), y)
+            if y_intercept:
+                st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu y (x = 0):")
+                st.latex(f"{constraint[1]}y = {constraint[2]}")
+                st.latex(f"y = {y_intercept[0]:.2f}")
+                st.write(f"  Perpotongan dengan sumbu y: y = {y_intercept[0]:.2f}")
+                max_y = max(max_y, y_intercept[0])
+        else:
+            y_intercept = [0]  # Default jika tidak ada solusi valid
         
         # Menyimpan batasan untuk plot grafik
         solutions.append((x_intercept[0], y_intercept[0]))
@@ -97,11 +103,13 @@ def plot_lp(solutions, constraints, max_x, max_y):
 
     for i, constraint in enumerate(constraints):
         a, b, c = constraint
-        y_vals = (c - a * x_vals) / b
-        plt.plot(x_vals, y_vals, label=f'Batasan {i+1}')
-        
-        # Garis putus-putus (untuk memperjelas daerah feasible)
-        plt.fill_between(x_vals, y_vals, where=(y_vals >= 0), alpha=0.2)
+        # Pastikan tidak ada pembagian dengan 0
+        if b != 0:
+            y_vals = (c - a * x_vals) / b
+            # Filter nilai tak hingga atau NaN
+            y_vals = np.where(np.isfinite(y_vals), y_vals, np.nan)
+            plt.plot(x_vals, y_vals, label=f'Batasan {i+1}')
+            plt.fill_between(x_vals, y_vals, where=(y_vals >= 0), alpha=0.2)
     
     plt.xlim(0, max(max_x, 10))
     plt.ylim(0, max(max_y, 10))
