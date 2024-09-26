@@ -72,13 +72,13 @@ def calculate_lp(z, constraints):
             y_intercept = solve(equation.subs(x, 0), y)
             if y_intercept:
                 st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu y (x = 0):")
-                st.write(f"  Perpotongan dengan sumbu y: y = {y_intercept[0]}")
+                st.write(f"  Perpotongan dengan sumbu y: y = {float(y_intercept[0]):g}")
         
         if constraint[0] != 0:
             x_intercept = solve(equation.subs(y, 0), x)
             if x_intercept:
                 st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu x (y = 0):")
-                st.write(f"  Perpotongan dengan sumbu x: x = {x_intercept[0]}")
+                st.write(f"  Perpotongan dengan sumbu x: x = {float(y_intercept[0]):g}")
         
         # Menyimpan batasan untuk plot grafik jika tidak ada koefisien 0 di kedua variabel
         if x_intercept and y_intercept:
