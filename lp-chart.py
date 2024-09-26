@@ -3,22 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sympy import symbols, Eq, solve
 
-# Menambahkan CSS untuk menjaga lebar kolom
-st.markdown("""
-    <style>
-    .css-1d391kg {
-        display: table;
-        width: 100%;
-    }
-    .css-1d391kg > div {
-        display: table-cell;
-        padding: 8px;
-        vertical-align: top;
-        width: 33%; /* Menjaga proporsi kolom tetap */
-    }
-    </style>
-""", unsafe_allow_html=True)
-
 # Fungsi untuk menampilkan input dinamis dengan streamlit
 def get_input():
     st.title("Kalkulator Linear Programming (Metode Grafik)")
@@ -39,25 +23,27 @@ def get_input():
     
     # Membuat tabel batasan dengan 3 kolom untuk setiap koefisien dan nilai batasan
     st.write("Masukkan Koefisien untuk x, y, dan Nilai Batasan di Tabel")
+    constraint_cols = st.columns(3)  # Buat tiga kolom untuk tabel
+    
+    constraints = []
+    # Menambahkan judul kolom
+    constraint_cols[0].write("Koefisien x")
+    constraint_cols[1].write("Koefisien y")
+    constraint_cols[2].write("Nilai batasan (<=)")
     
     # Mengambil input batasan untuk setiap baris
-    constraints = []
-    
-    # Loop untuk membuat input untuk setiap batasan
     for i in range(num_constraints):
-        cols = st.columns(3)  # Buat tiga kolom untuk tabel input batasan
-        
-        with cols[0]:
-            a = st.number_input(f"Koefisien x {i+1}", value=1.0, key=f"a_{i}", format="%.g")
-        with cols[1]:
-            b = st.number_input(f"Koefisien y {i+1}", value=1.0, key=f"b_{i}", format="%.g")
-        with cols[2]:
+        with constraint_cols[0]:
+            a = st.number_input(f"x{i+1}", value=1.0, key=f"a_{i}", format="%.g")
+        with constraint_cols[1]:
+            b = st.number_input(f"y{i+1}", value=1.0, key=f"b_{i}", format="%.g")
+        with constraint_cols[2]:
             c = st.number_input(f"Batasan {i+1}", value=1.0, key=f"c_{i}", format="%.g")
         
         constraints.append([a, b, c])
     
     return z, constraints
-    
+
 # Fungsi untuk menghitung dan menampilkan proses langkah demi langkah
 def calculate_lp(z, constraints):
     x, y = symbols('x y')
@@ -105,8 +91,6 @@ def calculate_lp(z, constraints):
 # Fungsi untuk menghitung titik perpotongan
 def find_intersections(constraints):
     intersection_points = []
-    epsilon = 1e-6  # Toleransi untuk mengecek kedekatan dengan sumbu
-
     for i in range(len(constraints)):
         for j in range(i + 1, len(constraints)):
             a1, b1, c1 = constraints[i]
@@ -117,19 +101,12 @@ def find_intersections(constraints):
                 # Menghitung titik perpotongan
                 x_val = (c1 * b2 - c2 * b1) / (a1 * b2 - a2 * b1)
                 y_val = (c1 - a1 * x_val) / b1
-                
                 # Tambahkan hanya titik-titik yang berada di daerah feasible
                 if x_val >= 0 and y_val >= 0:  # Pastikan titik dalam daerah feasible (x dan y >= 0)
-                    # Tambahkan kondisi untuk mempertimbangkan titik yang mendekati sumbu
-                    if (x_val < epsilon or y_val < epsilon):  # Titik dekat sumbu x atau y
-                        intersection_points.append((x_val, y_val))
-                    else:
-                        # Jika tidak mendekati sumbu, tambahkan hanya titik valid
-                        intersection_points.append((x_val, y_val))
+                    intersection_points.append((x_val, y_val))
     
     return intersection_points
 
-# Modifikasi pada fungsi find_optimal_solution tetap sama
 # Fungsi untuk menghitung nilai fungsi tujuan di setiap titik ekstrem
 def find_optimal_solution(z, intersection_points):
     optimal_value = None
@@ -143,16 +120,13 @@ def find_optimal_solution(z, intersection_points):
         
         # Jika ini adalah titik pertama atau nilai z lebih baik (tergantung apakah ingin memaksimalkan atau meminimalkan)
         if optimal_value is None or z_val > optimal_value:  # Untuk memaksimalkan
+        # if optimal_value is None or z_val < optimal_value:  # Untuk meminimalkan
             optimal_value = z_val
             optimal_point = (x_val, y_val)
     
     # Tampilkan hasil optimal
     st.subheader("Hasil Optimal")
-    if optimal_point:
-        st.write(f"Titik optimal adalah pada ({optimal_point[0]:.2f}, {optimal_point[1]:.2f}) dengan nilai fungsi tujuan {optimal_value:.2f}")
-    else:
-        st.write("Tidak ada titik optimal yang ditemukan.")
-    
+    st.write(f"Titik optimal adalah pada ({optimal_point[0]:.2f}, {optimal_point[1]:.2f}) dengan nilai fungsi tujuan {optimal_value:.2f}")
     return optimal_point, optimal_value
 
 # Fungsi untuk membuat plot grafik batasan dan daerah feasible
