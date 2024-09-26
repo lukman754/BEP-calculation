@@ -88,6 +88,47 @@ def calculate_lp(z, constraints):
 
     return solutions
 
+# Fungsi untuk menghitung titik perpotongan
+def find_intersections(constraints):
+    intersection_points = []
+    for i in range(len(constraints)):
+        for j in range(i + 1, len(constraints)):
+            a1, b1, c1 = constraints[i]
+            a2, b2, c2 = constraints[j]
+
+            # Menghindari kasus di mana kedua koefisien adalah 0
+            if a1 * b2 != a2 * b1:  # Jika garis tidak sejajar
+                # Menghitung titik perpotongan
+                x_val = (c1 * b2 - c2 * b1) / (a1 * b2 - a2 * b1)
+                y_val = (c1 - a1 * x_val) / b1
+                # Tambahkan hanya titik-titik yang berada di daerah feasible
+                if x_val >= 0 and y_val >= 0:  # Pastikan titik dalam daerah feasible (x dan y >= 0)
+                    intersection_points.append((x_val, y_val))
+    
+    return intersection_points
+
+# Fungsi untuk menghitung nilai fungsi tujuan di setiap titik ekstrem
+def find_optimal_solution(z, intersection_points):
+    optimal_value = None
+    optimal_point = None
+    
+    # Iterasi melalui setiap titik perpotongan
+    for (x_val, y_val) in intersection_points:
+        # Hitung nilai fungsi tujuan Z = z[0]*x + z[1]*y
+        z_val = z[0] * x_val + z[1] * y_val
+        st.write(f"Nilai fungsi tujuan di titik ({x_val:.2f}, {y_val:.2f}) adalah {z_val:.2f}")
+        
+        # Jika ini adalah titik pertama atau nilai z lebih baik (tergantung apakah ingin memaksimalkan atau meminimalkan)
+        if optimal_value is None or z_val > optimal_value:  # Untuk memaksimalkan
+        # if optimal_value is None or z_val < optimal_value:  # Untuk meminimalkan
+            optimal_value = z_val
+            optimal_point = (x_val, y_val)
+    
+    # Tampilkan hasil optimal
+    st.subheader("Hasil Optimal")
+    st.write(f"Titik optimal adalah pada ({optimal_point[0]:.2f}, {optimal_point[1]:.2f}) dengan nilai fungsi tujuan {optimal_value:.2f}")
+    return optimal_point, optimal_value
+
 # Fungsi untuk membuat plot grafik batasan dan daerah feasible
 def plot_lp(solutions, constraints):
     x_vals = np.linspace(0, 200, 400)  # Range x diperkecil untuk menyesuaikan tampilan
@@ -120,62 +161,40 @@ def plot_lp(solutions, constraints):
             y_max = max(y_max, c / b)
 
     # Menghitung dan menampilkan titik perpotongan
-    intersection_points = []
-    for i in range(len(constraints)):
-        for j in range(i + 1, len(constraints)):
-            a1, b1, c1 = constraints[i]
-            a2, b2, c2 = constraints[j]
-
-            # Menghindari kasus di mana kedua koefisien adalah 0
-            if a1 * b2 != a2 * b1:  # Jika garis tidak sejajar
-                # Menghitung titik perpotongan
-                x_val = (c1 * b2 - c2 * b1) / (a1 * b2 - a2 * b1)
-                y_val = (c1 - a1 * x_val) / b1
-                intersection_points.append((x_val, y_val))
-
     # Plot titik perpotongan
-    for (x_val, y_val) in intersection_points:
-        plt.plot(x_val, y_val, 'ro')  # Titik perpotongan berwarna merah
-        plt.axvline(x=x_val, linestyle='dashed', color='grey', alpha=0.5)  # Garis vertikal putus-putus
-        plt.axhline(y=y_val, linestyle='dashed', color='grey', alpha=0.5)  # Garis horizontal putus-putus
-        plt.annotate(f'({x_val:.2f}, {y_val:.2f})', (x_val, y_val), textcoords="offset points", xytext=(0,10), ha='center')
+    for solution in solutions:
+        plt.scatter(*solution, color='green', zorder=5)
+        plt.text(solution[0], solution[1], f"({solution[0]:.2f}, {solution[1]:.2f})", fontsize=9, verticalalignment='bottom')
 
-    # Sesuaikan sumbu berdasarkan nilai maksimum
-    plt.xlim(0, min(200, x_max * 1.1))  # Tambah 10% dari nilai max untuk ruang ekstra, batas 50 untuk skala lebih baik
-    plt.ylim(0, min(200, y_max * 1.1))
-    plt.axhline(0, color='black', linewidth=0.5)
-    plt.axvline(0, color='black', linewidth=0.5)
-    plt.grid(True, which='both')
-
+    # Mengatur label dan batas sumbu
+    plt.xlim(0, x_max + 5)
+    plt.ylim(0, y_max + 5)
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.title('Grafik Batasan dan Daerah Feasible')
     plt.legend()
-    plt.title("Grafik Linear Programming")
-    plt.xlabel("x")
-    plt.ylabel("y")
-    
+
+    # Menampilkan grafik
     st.pyplot(plt)
 
-# Main function to run the app
+# Fungsi utama yang memanggil semua fungsi lain
 def main():
     z, constraints = get_input()
     solutions = calculate_lp(z, constraints)
-    plot_lp(solutions, constraints)
 
-def add_footer():
-    footer = """
-    <style>
-        .footer {
-            width: 100%;
-            text-align: center;
-            padding: 10px;
-            margin-top: 20px;
-        }
-    </style>
-    <div class="footer">
-        <p><b>Chopin</b> © 2024</p>
-    </div>
-    """
-    st.markdown(footer, unsafe_allow_html=True)
+    # Temukan titik-titik perpotongan
+    st.subheader("Titik-titik Perpotongan")
+    intersection_points = find_intersections(constraints)
+    if not intersection_points:
+        st.write("Tidak ada titik perpotongan yang valid dalam daerah feasible.")
+        return
 
+    # Temukan solusi optimal
+    optimal_point, optimal_value = find_optimal_solution(z, intersection_points)
+
+    # Plot grafik solusi
+    plot_lp(intersection_points, constraints)
+
+# Menjalankan aplikasi
 if __name__ == "__main__":
     main()
-    add_footer()
