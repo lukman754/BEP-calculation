@@ -40,9 +40,10 @@ def get_input():
             c = st.number_input(f"Batasan {i+1}", value=1.0, key=f"c_{i}", format="%.g")
         
         constraints.append([a, b, c])
-        st.write(f"<tr><td>{a:.2f}</td><td>{b:.2f}</td><td>{c:.2f}</td></tr>", unsafe_allow_html=True)
+        
     
     st.write("</table>", unsafe_allow_html=True)
+    st.write(f"<tr><td>{a:.2f}</td><td>{b:.2f}</td><td>{c:.2f}</td></tr>", unsafe_allow_html=True)
     
     return z, constraints
 
