@@ -97,13 +97,22 @@ def plot_lp(solutions, constraints):
 
     for i, constraint in enumerate(constraints):
         a, b, c = constraint
-        if b != 0:  # Hanya plot jika koefisien y bukan 0
-            y_vals = (c - a * x_vals) / b
-            plt.plot(x_vals, y_vals, label=f'Batasan {i+1}')
-            
-            # Garis putus-putus (untuk memperjelas daerah feasible)
-            plt.fill_between(x_vals, y_vals, where=(y_vals >= 0), alpha=0.2)
         
+        # Hanya plot jika koefisien y bukan 0
+        if b != 0:
+            y_vals = (c - a * x_vals) / b
+            linestyle = 'solid' if a != 0 else 'dashed'  # Solid jika kedua koefisien tidak nol, dashed jika hanya y
+            plt.plot(x_vals, y_vals, label=f'Batasan {i+1}', linestyle=linestyle)
+            plt.fill_between(x_vals, y_vals, where=(y_vals >= 0), alpha=0.2)
+
+        # Jika hanya x yang tidak nol
+        if a != 0 and b == 0:
+            plt.axvline(x=c/a, linestyle='dashed', label=f'Batasan {i+1} (x hanya)', color='red')
+        
+        # Jika hanya y yang tidak nol
+        if a == 0 and b != 0:
+            plt.axhline(y=c/b, linestyle='dashed', label=f'Batasan {i+1} (y hanya)', color='blue')
+
         # Menyesuaikan batas sumbu berdasarkan nilai terbesar dari x dan y
         if a != 0:
             x_max = max(x_max, c / a)
