@@ -109,8 +109,8 @@ def plot_lp(solutions, constraints):
             y_max = max(y_max, c / b)
     
     # Sesuaikan sumbu berdasarkan nilai maksimum
-    plt.xlim(0, min(50, x_max * 1.1))  # Tambah 10% dari nilai max untuk ruang ekstra, batas 50 untuk skala lebih baik
-    plt.ylim(0, min(200, y_max * 1.1))
+    plt.xlim(0, min(1000, x_max * 1.1))  # Tambah 10% dari nilai max untuk ruang ekstra, batas 50 untuk skala lebih baik
+    plt.ylim(0, min(1000, y_max * 1.1))
     plt.axhline(0, color='black',linewidth=0.5)
     plt.axvline(0, color='black',linewidth=0.5)
     plt.grid(True, which='both')
