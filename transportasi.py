@@ -1,48 +1,70 @@
 import streamlit as st
 import numpy as np
-from scipy.optimize import linprog
 
-# Fungsi untuk menyelesaikan masalah transportasi
-def solve_transportation(supply, demand, cost_matrix):
-    num_suppliers = len(supply)
-    num_customers = len(demand)
+# Fungsi untuk metode Sudut Barat Laut
+def northwest_corner(supply, demand):
+    supply_copy = supply.copy()
+    demand_copy = demand.copy()
+    solution = np.zeros((len(supply), len(demand)))
     
-    # Membuat koefisien objektif
-    c = cost_matrix.flatten()  # Biaya per pengiriman
+    i, j = 0, 0
+    while i < len(supply) and j < len(demand):
+        min_val = min(supply_copy[i], demand_copy[j])
+        solution[i, j] = min_val
+        supply_copy[i] -= min_val
+        demand_copy[j] -= min_val
+        if supply_copy[i] == 0:
+            i += 1
+        if demand_copy[j] == 0:
+            j += 1
+    return solution
+
+# Fungsi untuk metode Biaya Terendah
+def least_cost(supply, demand, cost):
+    supply_copy = supply.copy()
+    demand_copy = demand.copy()
+    solution = np.zeros((len(supply), len(demand)))
     
-    # Membuat batasan (constraint)
-    A_eq = []
-    b_eq = []
+    while supply_copy.sum() > 0 and demand_copy.sum() > 0:
+        min_cost_index = np.unravel_index(np.argmin(cost, axis=None), cost.shape)
+        i, j = min_cost_index
+        min_val = min(supply_copy[i], demand_copy[j])
+        solution[i, j] = min_val
+        supply_copy[i] -= min_val
+        demand_copy[j] -= min_val
+        cost[i, j] = np.inf  # Set biaya jadi tak terhingga setelah dialokasikan
+    return solution
 
-    # Pembatasan untuk suplai
-    for i in range(num_suppliers):
-        constraint = [0] * num_suppliers * num_customers
-        for j in range(num_customers):
-            constraint[i * num_customers + j] = 1
-        A_eq.append(constraint)
-        b_eq.append(supply[i])
+# Fungsi untuk metode VAM
+def vogel_approximation(supply, demand, cost):
+    supply_copy = supply.copy()
+    demand_copy = demand.copy()
+    solution = np.zeros((len(supply), len(demand)))
 
-    # Pembatasan untuk permintaan
-    for j in range(num_customers):
-        constraint = [0] * num_suppliers * num_customers
-        for i in range(num_suppliers):
-            constraint[i * num_customers + j] = 1
-        A_eq.append(constraint)
-        b_eq.append(demand[j])
+    while supply_copy.sum() > 0 and demand_copy.sum() > 0:
+        row_penalty = np.apply_along_axis(lambda row: sorted(row)[1] - sorted(row)[0] if len(row) > 1 else 0, 1, cost)
+        col_penalty = np.apply_along_axis(lambda col: sorted(col)[1] - sorted(col)[0] if len(col) > 1 else 0, 0, cost)
 
-    A_eq = np.array(A_eq)
-    b_eq = np.array(b_eq)
+        max_row_penalty = np.max(row_penalty)
+        max_col_penalty = np.max(col_penalty)
 
-    # Batasan non-negatif
-    bounds = [(0, None)] * (num_suppliers * num_customers)
+        if max_row_penalty > max_col_penalty:
+            row = np.argmax(row_penalty)
+            col = np.argmin(cost[row, :])
+        else:
+            col = np.argmax(col_penalty)
+            row = np.argmin(cost[:, col])
 
-    # Menyelesaikan masalah linier programming
-    result = linprog(c, A_eq=A_eq, b_eq=b_eq, bounds=bounds, method='highs')
+        min_val = min(supply_copy[row], demand_copy[col])
+        solution[row, col] = min_val
+        supply_copy[row] -= min_val
+        demand_copy[col] -= min_val
+        cost[row, col] = np.inf
 
-    return result
+    return solution
 
 # Streamlit UI
-st.title("Metode Transportasi - Linear Programming")
+st.title("Metode Transportasi: Northwest, Least Cost, dan VAM")
 
 # Input jumlah supplier dan customer
 num_suppliers = st.number_input("Jumlah Supplier", min_value=2, max_value=10, value=3, step=1)
@@ -69,20 +91,25 @@ for i in range(num_suppliers):
         row.append(st.number_input(f"Biaya Supplier {i+1} ke Customer {j+1}", min_value=0, step=1))
     cost_matrix.append(row)
 
+# Convert ke numpy array
+cost_matrix = np.array(cost_matrix)
+supply = np.array(supply)
+demand = np.array(demand)
+
+# Pilihan metode
+method = st.selectbox("Pilih Metode", ["Sudut Barat Laut", "Biaya Terendah", "VAM"])
+
 # Tombol untuk menyelesaikan masalah
 if st.button("Selesaikan"):
-    supply = np.array(supply)
-    demand = np.array(demand)
-    cost_matrix = np.array(cost_matrix)
-
     if supply.sum() != demand.sum():
         st.error("Total suplai harus sama dengan total permintaan!")
     else:
-        result = solve_transportation(supply, demand, cost_matrix)
-        if result.success:
-            st.success("Masalah terselesaikan!")
-            st.write("Solusi Optimasi (Jumlah Pengiriman):")
-            solution_matrix = result.x.reshape((num_suppliers, num_customers))
-            st.write(solution_matrix)
-        else:
-            st.error("Tidak ditemukan solusi yang sesuai!")
+        if method == "Sudut Barat Laut":
+            solution = northwest_corner(supply, demand)
+        elif method == "Biaya Terendah":
+            solution = least_cost(supply, demand, cost_matrix.copy())
+        else:  # VAM
+            solution = vogel_approximation(supply, demand, cost_matrix.copy())
+
+        st.success(f"Solusi dengan metode {method}:")
+        st.write(solution)
