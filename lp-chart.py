@@ -91,6 +91,8 @@ def calculate_lp(z, constraints):
 # Fungsi untuk menghitung titik perpotongan
 def find_intersections(constraints):
     intersection_points = []
+    epsilon = 1e-6  # Toleransi untuk mengecek kedekatan dengan sumbu
+
     for i in range(len(constraints)):
         for j in range(i + 1, len(constraints)):
             a1, b1, c1 = constraints[i]
@@ -101,12 +103,19 @@ def find_intersections(constraints):
                 # Menghitung titik perpotongan
                 x_val = (c1 * b2 - c2 * b1) / (a1 * b2 - a2 * b1)
                 y_val = (c1 - a1 * x_val) / b1
+                
                 # Tambahkan hanya titik-titik yang berada di daerah feasible
                 if x_val >= 0 and y_val >= 0:  # Pastikan titik dalam daerah feasible (x dan y >= 0)
-                    intersection_points.append((x_val, y_val))
+                    # Tambahkan kondisi untuk mempertimbangkan titik yang mendekati sumbu
+                    if (x_val < epsilon or y_val < epsilon):  # Titik dekat sumbu x atau y
+                        intersection_points.append((x_val, y_val))
+                    else:
+                        # Jika tidak mendekati sumbu, tambahkan hanya titik valid
+                        intersection_points.append((x_val, y_val))
     
     return intersection_points
 
+# Modifikasi pada fungsi find_optimal_solution tetap sama
 # Fungsi untuk menghitung nilai fungsi tujuan di setiap titik ekstrem
 def find_optimal_solution(z, intersection_points):
     optimal_value = None
@@ -120,13 +129,16 @@ def find_optimal_solution(z, intersection_points):
         
         # Jika ini adalah titik pertama atau nilai z lebih baik (tergantung apakah ingin memaksimalkan atau meminimalkan)
         if optimal_value is None or z_val > optimal_value:  # Untuk memaksimalkan
-        # if optimal_value is None or z_val < optimal_value:  # Untuk meminimalkan
             optimal_value = z_val
             optimal_point = (x_val, y_val)
     
     # Tampilkan hasil optimal
     st.subheader("Hasil Optimal")
-    st.write(f"Titik optimal adalah pada ({optimal_point[0]:.2f}, {optimal_point[1]:.2f}) dengan nilai fungsi tujuan {optimal_value:.2f}")
+    if optimal_point:
+        st.write(f"Titik optimal adalah pada ({optimal_point[0]:.2f}, {optimal_point[1]:.2f}) dengan nilai fungsi tujuan {optimal_value:.2f}")
+    else:
+        st.write("Tidak ada titik optimal yang ditemukan.")
+    
     return optimal_point, optimal_value
 
 # Fungsi untuk membuat plot grafik batasan dan daerah feasible
