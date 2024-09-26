@@ -3,6 +3,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sympy import symbols, Eq, solve
 
+# Menambahkan CSS untuk menjaga lebar kolom
+st.markdown("""
+    <style>
+    .css-1d391kg {
+        display: table;
+        width: 100%;
+    }
+    .css-1d391kg > div {
+        display: table-cell;
+        padding: 8px;
+        vertical-align: top;
+        width: 33%; /* Menjaga proporsi kolom tetap */
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # Fungsi untuk menampilkan input dinamis dengan streamlit
 def get_input():
     st.title("Kalkulator Linear Programming (Metode Grafik)")
@@ -19,34 +35,29 @@ def get_input():
     num_constraints = st.number_input("Jumlah Batasan", min_value=1, max_value=5, step=1, value=2, key="num_constraints", format="%.g")
 
     # Input Batasan
-    st.header("Input Batasan")
+    st.header("Input Batasan dalam Tabel")
     
     # Membuat tabel batasan dengan 3 kolom untuk setiap koefisien dan nilai batasan
     st.write("Masukkan Koefisien untuk x, y, dan Nilai Batasan di Tabel")
-
-    constraints = []
-    # Menambahkan judul kolom
-    st.write("<table style='width: 100%; border-collapse: collapse;'>", unsafe_allow_html=True)
-    st.write("<tr><th>Koefisien x</th><th>Koefisien y</th><th>Nilai batasan (<=)</th></tr>", unsafe_allow_html=True)
     
     # Mengambil input batasan untuk setiap baris
+    constraints = []
+    
+    # Loop untuk membuat input untuk setiap batasan
     for i in range(num_constraints):
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            a = st.number_input(f"x{i+1}", value=1.0, key=f"a_{i}", format="%.g")
-        with col2:
-            b = st.number_input(f"y{i+1}", value=1.0, key=f"b_{i}", format="%.g")
-        with col3:
+        cols = st.columns(3)  # Buat tiga kolom untuk tabel input batasan
+        
+        with cols[0]:
+            a = st.number_input(f"Koefisien x {i+1}", value=1.0, key=f"a_{i}", format="%.g")
+        with cols[1]:
+            b = st.number_input(f"Koefisien y {i+1}", value=1.0, key=f"b_{i}", format="%.g")
+        with cols[2]:
             c = st.number_input(f"Batasan {i+1}", value=1.0, key=f"c_{i}", format="%.g")
         
         constraints.append([a, b, c])
-        
-    
-    st.write("</table>", unsafe_allow_html=True)
-    st.write(f"<tr><td>{a:.2f}</td><td>{b:.2f}</td><td>{c:.2f}</td></tr>", unsafe_allow_html=True)
     
     return z, constraints
-
+    
 # Fungsi untuk menghitung dan menampilkan proses langkah demi langkah
 def calculate_lp(z, constraints):
     x, y = symbols('x y')
