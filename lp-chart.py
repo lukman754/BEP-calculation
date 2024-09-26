@@ -178,4 +178,4 @@ def add_footer():
 
 if __name__ == "__main__":
     main()
-    add_footer():
+    add_footer()
