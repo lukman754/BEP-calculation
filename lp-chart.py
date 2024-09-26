@@ -11,12 +11,12 @@ def get_input():
     st.header("Input Fungsi Tujuan")
     
     cols = st.columns(2)  # Buat dua kolom untuk input x dan y
-    z_x = cols[0].number_input("Koefisien x", value=1.0, key="z_x")
-    z_y = cols[1].number_input("Koefisien y", value=1.0, key="z_y")
+    z_x = cols[0].number_input("Koefisien x", value=1.0, key="z_x", format="%.g")
+    z_y = cols[1].number_input("Koefisien y", value=1.0, key="z_y", format="%.g")
     
     z = [z_x, z_y]
 
-    num_constraints = st.number_input("Jumlah Batasan", min_value=1, max_value=5, step=1, value=2, key="num_constraints")
+    num_constraints = st.number_input("Jumlah Batasan", min_value=1, max_value=5, step=1, value=2, key="num_constraints", format="%.g")
 
     # Input Batasan
     st.header("Input Batasan dalam Tabel")
@@ -34,11 +34,11 @@ def get_input():
     # Mengambil input batasan untuk setiap baris
     for i in range(num_constraints):
         with constraint_cols[0]:
-            a = st.number_input(f"x{i+1}", value=1.0, key=f"a_{i}")
+            a = st.number_input(f"x{i+1}", value=1.0, key=f"a_{i}", format="%.g")
         with constraint_cols[1]:
-            b = st.number_input(f"y{i+1}", value=1.0, key=f"b_{i}")
+            b = st.number_input(f"y{i+1}", value=1.0, key=f"b_{i}", format="%.g")
         with constraint_cols[2]:
-            c = st.number_input(f"Batasan {i+1}", value=1.0, key=f"c_{i}")
+            c = st.number_input(f"Batasan {i+1}", value=1.0, key=f"c_{i}", format="%.g")
         
         constraints.append([a, b, c])
     
@@ -50,7 +50,7 @@ def calculate_lp(z, constraints):
     
     # Tampilkan fungsi tujuan
     st.subheader("Fungsi Tujuan")
-    st.write(f"Fungsi tujuan: {z[0]}x + {z[1]}y")
+    st.write(f"Fungsi tujuan: {z[0]:g}x + {z[1]:g}y")
     
     # Menyimpan solusi batasan
     solutions = []
@@ -58,11 +58,11 @@ def calculate_lp(z, constraints):
     # Proses setiap batasan
     for i, constraint in enumerate(constraints):
         st.subheader(f"Batasan {i+1}")
-        st.write(f"Batasan: {constraint[0]}x + {constraint[1]}y <= {constraint[2]}")
+        st.write(f"Batasan: {constraint[0]:g}x + {constraint[1]:g}y <= {constraint[2]:g}")
         
         # Menggunakan persamaan untuk eliminasi atau substitusi
         equation = Eq(constraint[0]*x + constraint[1]*y, constraint[2])
-        st.write(f"Persamaan batasan: {constraint[0]}x + {constraint[1]}y = {constraint[2]}")
+        st.write(f"Persamaan batasan: {constraint[0]:g}x + {constraint[1]:g}y = {constraint[2]:g}")
         
         # Hanya hitung perpotongan jika koefisien tidak 0
         x_intercept = None
@@ -72,14 +72,12 @@ def calculate_lp(z, constraints):
             y_intercept = solve(equation.subs(x, 0), y)
             if y_intercept:
                 st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu y (x = 0):")
-                st.latex(f"{constraint[1]}y = {constraint[2]}")
                 st.write(f"  Perpotongan dengan sumbu y: y = {y_intercept[0]:g}")
         
         if constraint[0] != 0:
             x_intercept = solve(equation.subs(y, 0), x)
             if x_intercept:
                 st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu x (y = 0):")
-                st.latex(f"{constraint[0]}x = {constraint[2]}")
                 st.write(f"  Perpotongan dengan sumbu x: x = {x_intercept[0]:g}")
         
         # Menyimpan batasan untuk plot grafik jika tidak ada koefisien 0 di kedua variabel
@@ -90,7 +88,7 @@ def calculate_lp(z, constraints):
 
 # Fungsi untuk membuat plot grafik batasan dan daerah feasible
 def plot_lp(solutions, constraints):
-    x_vals = np.linspace(0, 10, 400)
+    x_vals = np.linspace(0, 50, 400)  # Range x diperkecil untuk menyesuaikan tampilan
     plt.figure(figsize=(8, 8))
 
     x_max, y_max = 0, 0  # Inisialisasi batas maksimum untuk sumbu
@@ -111,8 +109,8 @@ def plot_lp(solutions, constraints):
             y_max = max(y_max, c / b)
     
     # Sesuaikan sumbu berdasarkan nilai maksimum
-    plt.xlim(0, x_max * 1.1)  # Tambah 10% dari nilai max untuk ruang ekstra
-    plt.ylim(0, y_max * 1.1)
+    plt.xlim(0, min(50, x_max * 1.1))  # Tambah 10% dari nilai max untuk ruang ekstra, batas 50 untuk skala lebih baik
+    plt.ylim(0, min(200, y_max * 1.1))
     plt.axhline(0, color='black',linewidth=0.5)
     plt.axvline(0, color='black',linewidth=0.5)
     plt.grid(True, which='both')
