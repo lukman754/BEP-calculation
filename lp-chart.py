@@ -115,7 +115,7 @@ def plot_lp(solutions, constraints, max_x, max_y):
             # Filter nilai tak hingga atau NaN
             y_vals = np.where(np.isfinite(y_vals), y_vals, np.nan)
             plt.plot(x_vals, y_vals, label=f'Batasan {i+1}')
-            plt.fill_between(x_vals, y_vals, where=(y_vals >= 0), alpha=0.2)
+            plt.fill_between(x_vals, y_vals, where=~np.isnan(y_vals) & (y_vals >= 0), alpha=0.2)
     
     plt.xlim(0, max(max_x, 10))
     plt.ylim(0, max(max_y, 10))
