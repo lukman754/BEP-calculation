@@ -59,7 +59,3 @@ if st.button("Hitung"):
     st.write("Status Solusi:", status)
     st.write("Solusi Optimal:", solution)
     st.write("Nilai Fungsi Objektif Maksimum:", objective_value)
-
-# Jalankan Streamlit
-if __name__ == "__main__":
-    st.run()
