@@ -160,5 +160,22 @@ def main():
     solutions = calculate_lp(z, constraints)
     plot_lp(solutions, constraints)
 
+def add_footer():
+    footer = """
+    <style>
+        .footer {
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            margin-top: 20px;
+        }
+    </style>
+    <div class="footer">
+        <p><b>Chopin</b> © 2024</p>
+    </div>
+    """
+    st.markdown(footer, unsafe_allow_html=True)
+
 if __name__ == "__main__":
     main()
+    add_footer():
