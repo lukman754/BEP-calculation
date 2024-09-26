@@ -118,7 +118,28 @@ def plot_lp(solutions, constraints):
             x_max = max(x_max, c / a)
         if b != 0:
             y_max = max(y_max, c / b)
-    
+
+    # Menghitung dan menampilkan titik perpotongan
+    intersection_points = []
+    for i in range(len(constraints)):
+        for j in range(i + 1, len(constraints)):
+            a1, b1, c1 = constraints[i]
+            a2, b2, c2 = constraints[j]
+
+            # Menghindari kasus di mana kedua koefisien adalah 0
+            if a1 * b2 != a2 * b1:  # Jika garis tidak sejajar
+                # Menghitung titik perpotongan
+                x_val = (c1 * b2 - c2 * b1) / (a1 * b2 - a2 * b1)
+                y_val = (c1 - a1 * x_val) / b1
+                intersection_points.append((x_val, y_val))
+
+    # Plot titik perpotongan
+    for (x_val, y_val) in intersection_points:
+        plt.plot(x_val, y_val, 'ro')  # Titik perpotongan berwarna merah
+        plt.axvline(x=x_val, linestyle='dashed', color='grey', alpha=0.5)  # Garis vertikal putus-putus
+        plt.axhline(y=y_val, linestyle='dashed', color='grey', alpha=0.5)  # Garis horizontal putus-putus
+        plt.annotate(f'({x_val:.2f}, {y_val:.2f})', (x_val, y_val), textcoords="offset points", xytext=(0,10), ha='center')
+
     # Sesuaikan sumbu berdasarkan nilai maksimum
     plt.xlim(0, min(200, x_max * 1.1))  # Tambah 10% dari nilai max untuk ruang ekstra, batas 50 untuk skala lebih baik
     plt.ylim(0, min(200, y_max * 1.1))
@@ -133,13 +154,11 @@ def plot_lp(solutions, constraints):
     
     st.pyplot(plt)
 
-# Main function for Streamlit app
+# Main function to run the app
 def main():
     z, constraints = get_input()
-    
-    if st.button("Hitung dan Tampilkan Grafik"):
-        solutions = calculate_lp(z, constraints)
-        plot_lp(solutions, constraints)
+    solutions = calculate_lp(z, constraints)
+    plot_lp(solutions, constraints)
 
 if __name__ == "__main__":
     main()
