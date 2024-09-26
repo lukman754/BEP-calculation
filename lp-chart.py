@@ -70,28 +70,34 @@ def calculate_lp(z, constraints):
         if constraint[1] != 0:  # Pastikan tidak ada pembagian dengan 0
             x_intercept = solve(equation.subs(y, 0), x)
             if x_intercept:
+                x_intercept_value = x_intercept[0] if x_intercept else 0
                 st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu x (y = 0):")
                 st.latex(f"{constraint[0]}x = {constraint[2]}")
-                st.latex(f"x = {x_intercept[0]:.2f}")
-                st.write(f"  Perpotongan dengan sumbu x: x = {x_intercept[0]:.2f}")
-                max_x = max(max_x, x_intercept[0])
+                st.latex(f"x = {x_intercept_value:.2f}")
+                st.write(f"  Perpotongan dengan sumbu x: x = {x_intercept_value:.2f}")
+                max_x = max(max_x, x_intercept_value)
+            else:
+                x_intercept_value = 0
         else:
-            x_intercept = [0]  # Default jika tidak ada solusi valid
+            x_intercept_value = 0  # Default jika tidak ada solusi valid
         
         # Solusi perpotongan dengan sumbu y (x=0)
         if constraint[0] != 0:  # Pastikan tidak ada pembagian dengan 0
             y_intercept = solve(equation.subs(x, 0), y)
             if y_intercept:
+                y_intercept_value = y_intercept[0] if y_intercept else 0
                 st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu y (x = 0):")
                 st.latex(f"{constraint[1]}y = {constraint[2]}")
-                st.latex(f"y = {y_intercept[0]:.2f}")
-                st.write(f"  Perpotongan dengan sumbu y: y = {y_intercept[0]:.2f}")
-                max_y = max(max_y, y_intercept[0])
+                st.latex(f"y = {y_intercept_value:.2f}")
+                st.write(f"  Perpotongan dengan sumbu y: y = {y_intercept_value:.2f}")
+                max_y = max(max_y, y_intercept_value)
+            else:
+                y_intercept_value = 0
         else:
-            y_intercept = [0]  # Default jika tidak ada solusi valid
+            y_intercept_value = 0  # Default jika tidak ada solusi valid
         
         # Menyimpan batasan untuk plot grafik
-        solutions.append((x_intercept[0], y_intercept[0]))
+        solutions.append((x_intercept_value, y_intercept_value))
     
     return solutions, max_x, max_y
 
