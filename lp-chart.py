@@ -73,16 +73,14 @@ def calculate_lp(z, constraints):
             if y_intercept:
                 st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu y (x = 0):")
                 st.latex(f"{constraint[1]}y = {constraint[2]}")
-                st.latex(f"y = {y_intercept[0]:.2f}")
-                st.write(f"  Perpotongan dengan sumbu y: y = {y_intercept[0]:.2f}")
+                st.write(f"  Perpotongan dengan sumbu y: y = {y_intercept[0]:g}")
         
         if constraint[0] != 0:
             x_intercept = solve(equation.subs(y, 0), x)
             if x_intercept:
                 st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu x (y = 0):")
                 st.latex(f"{constraint[0]}x = {constraint[2]}")
-                st.latex(f"x = {x_intercept[0]:.2f}")
-                st.write(f"  Perpotongan dengan sumbu x: x = {x_intercept[0]:.2f}")
+                st.write(f"  Perpotongan dengan sumbu x: x = {x_intercept[0]:g}")
         
         # Menyimpan batasan untuk plot grafik jika tidak ada koefisien 0 di kedua variabel
         if x_intercept and y_intercept:
@@ -95,6 +93,8 @@ def plot_lp(solutions, constraints):
     x_vals = np.linspace(0, 10, 400)
     plt.figure(figsize=(8, 8))
 
+    x_max, y_max = 0, 0  # Inisialisasi batas maksimum untuk sumbu
+
     for i, constraint in enumerate(constraints):
         a, b, c = constraint
         if b != 0:  # Hanya plot jika koefisien y bukan 0
@@ -103,9 +103,16 @@ def plot_lp(solutions, constraints):
             
             # Garis putus-putus (untuk memperjelas daerah feasible)
             plt.fill_between(x_vals, y_vals, where=(y_vals >= 0), alpha=0.2)
+        
+        # Menyesuaikan batas sumbu berdasarkan nilai terbesar dari x dan y
+        if a != 0:
+            x_max = max(x_max, c / a)
+        if b != 0:
+            y_max = max(y_max, c / b)
     
-    plt.xlim(0, 10)
-    plt.ylim(0, 10)
+    # Sesuaikan sumbu berdasarkan nilai maksimum
+    plt.xlim(0, x_max * 1.1)  # Tambah 10% dari nilai max untuk ruang ekstra
+    plt.ylim(0, y_max * 1.1)
     plt.axhline(0, color='black',linewidth=0.5)
     plt.axvline(0, color='black',linewidth=0.5)
     plt.grid(True, which='both')
