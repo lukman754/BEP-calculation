@@ -19,28 +19,30 @@ def get_input():
     num_constraints = st.number_input("Jumlah Batasan", min_value=1, max_value=5, step=1, value=2, key="num_constraints", format="%.g")
 
     # Input Batasan
-    st.header("Input Batasan dalam Tabel")
+    st.header("Input Batasan")
     
     # Membuat tabel batasan dengan 3 kolom untuk setiap koefisien dan nilai batasan
     st.write("Masukkan Koefisien untuk x, y, dan Nilai Batasan di Tabel")
-    constraint_cols = st.columns(3)  # Buat tiga kolom untuk tabel
-    
+
     constraints = []
     # Menambahkan judul kolom
-    constraint_cols[0].write("Koefisien x")
-    constraint_cols[1].write("Koefisien y")
-    constraint_cols[2].write("Nilai batasan (<=)")
+    st.write("<table style='width: 100%; border-collapse: collapse;'>", unsafe_allow_html=True)
+    st.write("<tr><th>Koefisien x</th><th>Koefisien y</th><th>Nilai batasan (<=)</th></tr>", unsafe_allow_html=True)
     
     # Mengambil input batasan untuk setiap baris
     for i in range(num_constraints):
-        with constraint_cols[0]:
+        col1, col2, col3 = st.columns(3)
+        with col1:
             a = st.number_input(f"x{i+1}", value=1.0, key=f"a_{i}", format="%.g")
-        with constraint_cols[1]:
+        with col2:
             b = st.number_input(f"y{i+1}", value=1.0, key=f"b_{i}", format="%.g")
-        with constraint_cols[2]:
+        with col3:
             c = st.number_input(f"Batasan {i+1}", value=1.0, key=f"c_{i}", format="%.g")
         
         constraints.append([a, b, c])
+        st.write(f"<tr><td>{a:.2f}</td><td>{b:.2f}</td><td>{c:.2f}</td></tr>", unsafe_allow_html=True)
+    
+    st.write("</table>", unsafe_allow_html=True)
     
     return z, constraints
 
