@@ -68,22 +68,24 @@ def calculate_lp(z, constraints):
         x_intercept = None
         y_intercept = None
 
-        if constraint[1] != 0:
+        # Hitung jika salah satu koefisien tidak nol
+        if constraint[0] != 0 and constraint[1] != 0:
             y_intercept = solve(equation.subs(x, 0), y)
-            if y_intercept:
-                st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu y (x = 0):")
-                st.write(f"  Perpotongan dengan sumbu y: y = {float(y_intercept[0]):g}")
-        
-        if constraint[0] != 0:
             x_intercept = solve(equation.subs(y, 0), x)
-            if x_intercept:
-                st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu x (y = 0):")
-                st.write(f"  Perpotongan dengan sumbu x: x = {float(y_intercept[0]):g}")
-        
-        # Menyimpan batasan untuk plot grafik jika tidak ada koefisien 0 di kedua variabel
-        if x_intercept and y_intercept:
+            st.write(f"  Perpotongan dengan sumbu y: y = {float(y_intercept[0]):g}")
+            st.write(f"  Perpotongan dengan sumbu x: x = {float(x_intercept[0]):g}")
             solutions.append((x_intercept[0], y_intercept[0]))
-    
+
+        elif constraint[0] != 0:  # Hanya x yang tidak nol
+            x_intercept = solve(equation.subs(y, 0), x)
+            st.write(f"  Perpotongan dengan sumbu x: x = {float(x_intercept[0]):g}")
+            solutions.append((x_intercept[0], 0))  # y = 0
+
+        elif constraint[1] != 0:  # Hanya y yang tidak nol
+            y_intercept = solve(equation.subs(x, 0), y)
+            st.write(f"  Perpotongan dengan sumbu y: y = {float(y_intercept[0]):g}")
+            solutions.append((0, y_intercept[0]))  # x = 0
+
     return solutions
 
 # Fungsi untuk membuat plot grafik batasan dan daerah feasible
@@ -111,8 +113,8 @@ def plot_lp(solutions, constraints):
     # Sesuaikan sumbu berdasarkan nilai maksimum
     plt.xlim(0, min(200, x_max * 1.1))  # Tambah 10% dari nilai max untuk ruang ekstra, batas 50 untuk skala lebih baik
     plt.ylim(0, min(200, y_max * 1.1))
-    plt.axhline(0, color='black',linewidth=0.5)
-    plt.axvline(0, color='black',linewidth=0.5)
+    plt.axhline(0, color='black', linewidth=0.5)
+    plt.axvline(0, color='black', linewidth=0.5)
     plt.grid(True, which='both')
 
     plt.legend()
