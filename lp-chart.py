@@ -45,13 +45,12 @@ def get_input():
     return z, constraints
 
 # Fungsi untuk menghitung dan menampilkan proses langkah demi langkah
-# Fungsi untuk menghitung dan menampilkan proses langkah demi langkah
 def calculate_lp(z, constraints):
     x, y = symbols('x y')
     
     # Tampilkan fungsi tujuan
     st.subheader("Fungsi Tujuan")
-    st.write(f"Fungsi tujuan: {z[0]}x + {z[1]}y")
+    st.write(f"Fungsi tujuan: {z[0]:g}x + {z[1]:g}y")
     
     # Menyimpan solusi batasan
     solutions = []
@@ -59,64 +58,69 @@ def calculate_lp(z, constraints):
     # Proses setiap batasan
     for i, constraint in enumerate(constraints):
         st.subheader(f"Batasan {i+1}")
-        st.write(f"Batasan: {constraint[0]}x + {constraint[1]}y <= {constraint[2]}")
+        st.write(f"Batasan: {constraint[0]:g}x + {constraint[1]:g}y <= {constraint[2]:g}")
         
         # Menggunakan persamaan untuk eliminasi atau substitusi
         equation = Eq(constraint[0]*x + constraint[1]*y, constraint[2])
-        st.write(f"Persamaan batasan: {constraint[0]}x + {constraint[1]}y = {constraint[2]}")
+        st.write(f"Persamaan batasan: {constraint[0]:g}x + {constraint[1]:g}y = {constraint[2]:g}")
         
-        # Solusi perpotongan dengan sumbu x (y=0)
-        if constraint[1] != 0:  # Pastikan koefisien y tidak 0
-            x_intercept = solve(equation.subs(y, 0), x)
-            if x_intercept and float(x_intercept[0]) != 0:
-                st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu x (y = 0):")
-                st.latex(f"{constraint[0]}x = {constraint[2]}")
-                st.latex(f"x = {float(x_intercept[0]):g}")
-                st.write(f"  Perpotongan dengan sumbu x: x = {float(x_intercept[0]):g}")
-        else:
-            x_intercept = [None]  # Jika y=0, tidak ada intercept dengan x
-        
-        # Solusi perpotongan dengan sumbu y (x=0)
-        if constraint[0] != 0:  # Pastikan koefisien x tidak 0
+        # Hanya hitung perpotongan jika koefisien tidak 0
+        x_intercept = None
+        y_intercept = None
+
+        if constraint[1] != 0:
             y_intercept = solve(equation.subs(x, 0), y)
-            if y_intercept and float(y_intercept[0]) != 0:
+            if y_intercept:
                 st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu y (x = 0):")
-                st.latex(f"{constraint[1]}y = {constraint[2]}")
-                st.latex(f"y = {float(y_intercept[0]):g}")
                 st.write(f"  Perpotongan dengan sumbu y: y = {float(y_intercept[0]):g}")
-        else:
-            y_intercept = [None]  # Jika x=0, tidak ada intercept dengan y
         
-        # Menyimpan batasan untuk plot grafik jika tidak ada hasil 0
-        if x_intercept[0] is not None and y_intercept[0] is not None:
-            solutions.append((float(x_intercept[0]), float(y_intercept[0])))
+        if constraint[0] != 0:
+            x_intercept = solve(equation.subs(y, 0), x)
+            if x_intercept:
+                st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu x (y = 0):")
+                st.write(f"  Perpotongan dengan sumbu x: x = {float(y_intercept[0]):g}")
+        
+        # Menyimpan batasan untuk plot grafik jika tidak ada koefisien 0 di kedua variabel
+        if x_intercept and y_intercept:
+            solutions.append((x_intercept[0], y_intercept[0]))
     
     return solutions
 
-
-# Fungsi untuk membuat plot grafik batasan dan daerah feasible
 # Fungsi untuk membuat plot grafik batasan dan daerah feasible
 def plot_lp(solutions, constraints):
-    x_vals = np.linspace(0, 10, 400)
+    x_vals = np.linspace(0, 50, 400)  # Range x diperkecil untuk menyesuaikan tampilan
     plt.figure(figsize=(8, 8))
+
+    x_max, y_max = 0, 0  # Inisialisasi batas maksimum untuk sumbu
 
     for i, constraint in enumerate(constraints):
         a, b, c = constraint
-        if a != 0 and b != 0:  # Pastikan a dan b bukan 0
+        if b != 0:  # Hanya plot jika koefisien y bukan 0
             y_vals = (c - a * x_vals) / b
             plt.plot(x_vals, y_vals, label=f'Batasan {i+1}')
-        
+            
             # Garis putus-putus (untuk memperjelas daerah feasible)
             plt.fill_between(x_vals, y_vals, where=(y_vals >= 0), alpha=0.2)
+        
+        # Menyesuaikan batas sumbu berdasarkan nilai terbesar dari x dan y
+        if a != 0:
+            x_max = max(x_max, c / a)
+        if b != 0:
+            y_max = max(y_max, c / b)
     
+    # Sesuaikan sumbu berdasarkan nilai maksimum
+    plt.xlim(0, min(200, x_max * 1.1))  # Tambah 10% dari nilai max untuk ruang ekstra, batas 50 untuk skala lebih baik
+    plt.ylim(0, min(200, y_max * 1.1))
+    plt.axhline(0, color='black',linewidth=0.5)
+    plt.axvline(0, color='black',linewidth=0.5)
     plt.grid(True, which='both')
+
     plt.legend()
     plt.title("Grafik Linear Programming")
     plt.xlabel("x")
     plt.ylabel("y")
     
     st.pyplot(plt)
-
 
 # Main function for Streamlit app
 def main():
