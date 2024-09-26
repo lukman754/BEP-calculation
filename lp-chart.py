@@ -115,12 +115,17 @@ def plot_lp(solutions, constraints, max_x, max_y):
             # Filter nilai tak hingga atau NaN
             y_vals = np.where(np.isfinite(y_vals), y_vals, np.nan)
             plt.plot(x_vals, y_vals, label=f'Batasan {i+1}')
-            plt.fill_between(x_vals, y_vals, where=~np.isnan(y_vals) & (y_vals >= 0), alpha=0.2)
+            plt.fill_between(x_vals, y_vals, where=(y_vals >= 0) & np.isfinite(y_vals), alpha=0.2)
+        elif a != 0:
+            # Handle vertical lines (x = constant)
+            x_const = c / a
+            plt.axvline(x=x_const, label=f'Batasan {i+1}', linestyle='--')
+            plt.fill_betweenx([0, max(max_y, 10)], 0, x_const, alpha=0.2)
     
     plt.xlim(0, max(max_x, 10))
     plt.ylim(0, max(max_y, 10))
-    plt.axhline(0, color='black',linewidth=0.5)
-    plt.axvline(0, color='black',linewidth=0.5)
+    plt.axhline(0, color='black', linewidth=0.5)
+    plt.axvline(0, color='black', linewidth=0.5)
     plt.grid(True, which='both')
 
     plt.legend()
