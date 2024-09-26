@@ -54,6 +54,8 @@ def calculate_lp(z, constraints):
     
     # Menyimpan solusi batasan
     solutions = []
+    max_x = 0
+    max_y = 0
     
     # Proses setiap batasan
     for i, constraint in enumerate(constraints):
@@ -71,6 +73,7 @@ def calculate_lp(z, constraints):
             st.latex(f"{constraint[0]}x = {constraint[2]}")
             st.latex(f"x = {x_intercept[0]:.2f}")
             st.write(f"  Perpotongan dengan sumbu x: x = {x_intercept[0]:.2f}")
+            max_x = max(max_x, x_intercept[0])
         
         # Solusi perpotongan dengan sumbu y (x=0)
         y_intercept = solve(equation.subs(x, 0), y)
@@ -79,15 +82,17 @@ def calculate_lp(z, constraints):
             st.latex(f"{constraint[1]}y = {constraint[2]}")
             st.latex(f"y = {y_intercept[0]:.2f}")
             st.write(f"  Perpotongan dengan sumbu y: y = {y_intercept[0]:.2f}")
+            max_y = max(max_y, y_intercept[0])
         
         # Menyimpan batasan untuk plot grafik
         solutions.append((x_intercept[0], y_intercept[0]))
     
-    return solutions
+    return solutions, max_x, max_y
 
 # Fungsi untuk membuat plot grafik batasan dan daerah feasible
-def plot_lp(solutions, constraints):
-    x_vals = np.linspace(0, 10, 400)
+def plot_lp(solutions, constraints, max_x, max_y):
+    # Buat skala sumbu dinamis berdasarkan nilai maksimum
+    x_vals = np.linspace(0, max(max_x, 10), 400)
     plt.figure(figsize=(8, 8))
 
     for i, constraint in enumerate(constraints):
@@ -98,8 +103,8 @@ def plot_lp(solutions, constraints):
         # Garis putus-putus (untuk memperjelas daerah feasible)
         plt.fill_between(x_vals, y_vals, where=(y_vals >= 0), alpha=0.2)
     
-    plt.xlim(0, 10)
-    plt.ylim(0, 10)
+    plt.xlim(0, max(max_x, 10))
+    plt.ylim(0, max(max_y, 10))
     plt.axhline(0, color='black',linewidth=0.5)
     plt.axvline(0, color='black',linewidth=0.5)
     plt.grid(True, which='both')
@@ -116,8 +121,8 @@ def main():
     z, constraints = get_input()
     
     if st.button("Hitung dan Tampilkan Grafik"):
-        solutions = calculate_lp(z, constraints)
-        plot_lp(solutions, constraints)
+        solutions, max_x, max_y = calculate_lp(z, constraints)
+        plot_lp(solutions, constraints, max_x, max_y)
 
 if __name__ == "__main__":
     main()
