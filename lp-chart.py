@@ -3,25 +3,36 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sympy import symbols, Eq, solve
 
-# Fungsi untuk menampilkan input dinamis dengan streamlit
+# Fungsi untuk menampilkan input dinamis dengan tampilan tabel di streamlit
 def get_input():
     st.title("Kalkulator Linear Programming (Metode Grafik)")
     
     st.header("Input Fungsi Tujuan")
-    z = [
-        st.number_input("Koefisien x pada fungsi tujuan", value=1.0, key="z_x"),
-        st.number_input("Koefisien y pada fungsi tujuan", value=1.0, key="z_y")
-    ]
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        z_x = st.number_input("Koefisien x", value=1.0, key="z_x")
+    with col2:
+        z_y = st.number_input("Koefisien y", value=1.0, key="z_y")
+    
+    z = [z_x, z_y]
     
     num_constraints = st.number_input("Jumlah Batasan", min_value=1, max_value=5, step=1, value=2, key="num_constraints")
-    st.header("Input Batasan")
+    
+    st.header("Input Batasan (dalam bentuk tabel)")
     
     constraints = []
+    
     for i in range(num_constraints):
         st.subheader(f"Batasan {i+1}")
-        a = st.number_input(f"Koefisien x pada batasan {i+1}", value=1.0, key=f"a_{i}")
-        b = st.number_input(f"Koefisien y pada batasan {i+1}", value=1.0, key=f"b_{i}")
-        c = st.number_input(f"Nilai batasan {i+1} (<=)", value=1.0, key=f"c_{i}")
+        cols = st.columns(3)
+        with cols[0]:
+            a = st.number_input(f"Koefisien x pada batasan {i+1}", value=1.0, key=f"a_{i}")
+        with cols[1]:
+            b = st.number_input(f"Koefisien y pada batasan {i+1}", value=1.0, key=f"b_{i}")
+        with cols[2]:
+            c = st.number_input(f"Nilai batasan {i+1} (<=)", value=1.0, key=f"c_{i}")
+        
         constraints.append([a, b, c])
     
     return z, constraints
