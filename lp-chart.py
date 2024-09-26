@@ -88,7 +88,7 @@ def calculate_lp(z, constraints):
 
 # Fungsi untuk membuat plot grafik batasan dan daerah feasible
 def plot_lp(solutions, constraints):
-    x_vals = np.linspace(0, 50, 400)  # Range x diperkecil untuk menyesuaikan tampilan
+    x_vals = np.linspace(0, 200, 400)  # Range x diperkecil untuk menyesuaikan tampilan
     plt.figure(figsize=(8, 8))
 
     x_max, y_max = 0, 0  # Inisialisasi batas maksimum untuk sumbu
