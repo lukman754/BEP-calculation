@@ -64,24 +64,29 @@ def calculate_lp(z, constraints):
         equation = Eq(constraint[0]*x + constraint[1]*y, constraint[2])
         st.write(f"Persamaan batasan: {constraint[0]}x + {constraint[1]}y = {constraint[2]}")
         
-        # Solusi perpotongan dengan sumbu x (y=0)
-        x_intercept = solve(equation.subs(y, 0), x)
-        if x_intercept:
-            st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu x (y = 0):")
-            st.latex(f"{constraint[0]}x = {constraint[2]}")
-            st.latex(f"x = {x_intercept[0]:.2f}")
-            st.write(f"  Perpotongan dengan sumbu x: x = {x_intercept[0]:.2f}")
+        # Hanya hitung perpotongan jika koefisien tidak 0
+        x_intercept = None
+        y_intercept = None
+
+        if constraint[1] != 0:
+            y_intercept = solve(equation.subs(x, 0), y)
+            if y_intercept:
+                st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu y (x = 0):")
+                st.latex(f"{constraint[1]}y = {constraint[2]}")
+                st.latex(f"y = {y_intercept[0]:.2f}")
+                st.write(f"  Perpotongan dengan sumbu y: y = {y_intercept[0]:.2f}")
         
-        # Solusi perpotongan dengan sumbu y (x=0)
-        y_intercept = solve(equation.subs(x, 0), y)
-        if y_intercept:
-            st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu y (x = 0):")
-            st.latex(f"{constraint[1]}y = {constraint[2]}")
-            st.latex(f"y = {y_intercept[0]:.2f}")
-            st.write(f"  Perpotongan dengan sumbu y: y = {y_intercept[0]:.2f}")
+        if constraint[0] != 0:
+            x_intercept = solve(equation.subs(y, 0), x)
+            if x_intercept:
+                st.write(f"  Proses eliminasi untuk menemukan perpotongan dengan sumbu x (y = 0):")
+                st.latex(f"{constraint[0]}x = {constraint[2]}")
+                st.latex(f"x = {x_intercept[0]:.2f}")
+                st.write(f"  Perpotongan dengan sumbu x: x = {x_intercept[0]:.2f}")
         
-        # Menyimpan batasan untuk plot grafik
-        solutions.append((x_intercept[0], y_intercept[0]))
+        # Menyimpan batasan untuk plot grafik jika tidak ada koefisien 0 di kedua variabel
+        if x_intercept and y_intercept:
+            solutions.append((x_intercept[0], y_intercept[0]))
     
     return solutions
 
@@ -92,11 +97,12 @@ def plot_lp(solutions, constraints):
 
     for i, constraint in enumerate(constraints):
         a, b, c = constraint
-        y_vals = (c - a * x_vals) / b
-        plt.plot(x_vals, y_vals, label=f'Batasan {i+1}')
-        
-        # Garis putus-putus (untuk memperjelas daerah feasible)
-        plt.fill_between(x_vals, y_vals, where=(y_vals >= 0), alpha=0.2)
+        if b != 0:  # Hanya plot jika koefisien y bukan 0
+            y_vals = (c - a * x_vals) / b
+            plt.plot(x_vals, y_vals, label=f'Batasan {i+1}')
+            
+            # Garis putus-putus (untuk memperjelas daerah feasible)
+            plt.fill_between(x_vals, y_vals, where=(y_vals >= 0), alpha=0.2)
     
     plt.xlim(0, 10)
     plt.ylim(0, 10)
